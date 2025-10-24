@@ -1,0 +1,2915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SUnv-Mol.Vw API - 3Dmol.js</title>
+    <!-- html2canvas library for PNG export -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        
+        input[type="color"] {
+           /* border-radius: 50%;*/ /* Makes the input round */
+           /* inline-size: 30px;*/
+            block-size: 32px;
+            border: 1px solid #dc8149;
+            padding: 1px; /* Adjust padding around the color swatch */
+        }
+
+        .viewer-panel {
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: white;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .panel-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px 6px 0 0;
+            font-weight: bold;
+            text-align: center;
+    }
+    
+    #viewer {
+            width: 100%;
+            height: calc(100vh - 60px);
+            background: #000;
+      position: relative;
+            transition: height 0.3s ease;
+        }
+        
+        .viewer-expanded #viewer {
+            height: calc(100vh - 60px);
+        }
+        
+        .controls:not(.collapsed) ~ .viewer-panel #viewer {
+            height: 500px;
+        }
+        
+        .atom-label {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .plddt-key {
+      position: absolute;
+            left: 15px;
+            top: 55px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 10px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .plddt-key h4 {
+            margin: 0 0 5px 0;
+      font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .plddt-item {
+            display: flex;
+            align-items: center;
+            margin: 2px 0;
+        }
+        
+        .plddt-color {
+            width: 12px;
+            height: 12px;
+            margin-right: 5px;
+            border: 1px solid #333;
+        }
+        
+        .bottom-panel {
+      position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 1px solid #333;
+            padding: 8px 10px;
+            color: #fff;
+            z-index: 999;
+        }
+        
+        .structure-info-panel {
+            /*padding-top: 8px;*/
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .structure-info-panel label {
+      font-weight: bold;
+            color: #4CAF50;
+            margin-right: 8px;
+    }
+    
+        .structure-info-panel span {
+            color: #fff;
+      font-size: 11px;
+    }
+    
+        .copyright-panel {
+            text-align: center;
+        }
+        
+        .copyright-text {
+            font-size: 10px;
+            line-height: 1.3;
+            color: #ccc;
+        }
+        
+        .controls {
+      position: absolute;
+      bottom: 80px;
+            left: 0;
+            right: 0;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .controls-header {
+            padding: 3px 8px;
+            background: #e9ecef;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        
+        .controls-title {
+            cursor: pointer;
+        }
+        
+        .controls-header:hover {
+            background: #dee2e6;
+        }
+        
+        .controls-title {
+      font-weight: bold;
+            color: #495057;
+        }
+        
+        .chain-indicator {
+            font-size: 11px;
+            color: #666;
+            margin: 0 10px;
+            font-style: italic;
+        }
+        
+        .chain-indicator .chain-name {
+            font-weight: normal;
+            color: #666;
+        }
+        
+        .chain-indicator .chain-name.selected {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .ligand-indicator {
+            font-size: 11px;
+            color: #666;
+            margin: 0 10px;
+            font-style: italic;
+        }
+        
+        .ligand-indicator .ligand-name {
+            font-weight: normal;
+            color: #666;
+        }
+        
+        .ligand-indicator .ligand-name.selected {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .controls-toggle {
+            font-size: 20px;
+            color: #6c757d;
+            transition: transform 0.3s ease;
+            padding-right: 10px;
+        }
+        
+        .controls-content {
+            padding: 5px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        /* Draggable controls panel */
+        .controls.draggable {
+            position: fixed;
+            z-index: 1000;
+            cursor: default;/*pointer;move;*/
+            /*width: 95%;
+            min-width: 200px;
+            max-width: 700px;
+            min-height: 150px;
+            max-height: 200px;*/
+            height: 130px; width: 1150px;
+            /*resize: both;*/
+            overflow: auto;
+        }
+        
+        .controls.draggable .controls-header {
+            cursor: pointer;/*move;*/
+            user-select: none;
+        }
+        
+        .controls.draggable .controls-header:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .controls.dragging {
+            transition: none !important;
+        }
+        
+        .controls.resizing {
+            transition: none !important;
+        }
+        
+        .controls.collapsed {
+            transform: translateY(calc(100% - 20px));
+        }
+        
+        .controls.collapsed .controls-content {
+            max-height: 0;
+            padding: 0 10px;
+        }
+        
+        .controls.collapsed .controls-toggle {
+            transform: rotate(180deg);
+        }
+        
+        .control-group {
+            margin: 5px 0;
+            /*width: 400px;*/
+        }
+        
+        .control-group-inline {
+            display: inline-flex;
+            align-items: calc(50%-200px);
+            justify-content: left;
+            text-align: right;
+            gap: 3px;
+            width: 450px; /* added width to the control-group-inline */
+        }
+        
+        .control-group-inline label {
+            margin-right: 3px;
+        }
+        
+        .chains-container {
+            display: inline-flex;
+            text-align: left;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-top: 5px;
+            margin-left: 0;
+            margin-right: 0;
+            padding: 0;
+        }
+        
+        .chain-checkbox {
+      display: flex;
+            align-items: left;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            width: 30px;
+        }
+        
+        .chain-checkbox input[type="checkbox"] {
+            margin: 0;
+        }
+        
+        .chain-checkbox label {
+            font-size: 11px;
+            margin: 0;
+            width: auto;
+            cursor: pointer;
+        }
+        
+        .control-group-with-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .control-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+           /* padding: 0px 10px; */
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 100px;
+            font-size: 12px;
+        }
+        
+        .control-group select, .control-group input {
+            font-size: 12px;
+            padding: 2px 4px;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 2px;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-png {
+            background: #4398ed;
+            white-space: nowrap;
+        }
+        .btn-png:hover {
+            background: hwb(210 27% 41%);
+        }
+        .btn-small {
+            padding: 3px 3px;
+            font-size: 12px;
+            margin: 0;
+    }
+  </style>
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+</head>
+<body class="viewer-expanded">
+    <div class="viewer-panel">
+        <div class="panel-header">
+            SUnv-Mol.Vw API - Molecular Structure Viewer
+        </div>
+        
+  <div id="viewer"></div>
+        
+        <!-- pLDDT Color Key (hidden by default) -->
+        <div id="plddtKey" class="plddt-key" style="display: none;">
+            <h4>pLDDT Confidence</h4>
+            <div class="plddt-item">
+                <div class="plddt-color" style="background-color: #4343e7;"></div>
+                <span>Very High (90-100)</span>
+            </div>
+            <div class="plddt-item">
+                <div class="plddt-color" style="background-color: #56acf8;"></div>
+                <span>Very Confident (70-90)</span>
+            </div>
+            <div class="plddt-item">
+                <div class="plddt-color" style="background-color: #ffcc00;"></div>
+                <span>Confident (50-70)</span>
+            </div>
+            <div class="plddt-item">
+                <div class="plddt-color" style="background-color: #ff8800;"></div>
+                <span>Low (40-50)</span>
+            </div>
+            <div class="plddt-item">
+                <div class="plddt-color" style="background-color: #ff0000;"></div>
+                <span>Very Low (0-40)</span>
+            </div>
+  </div>
+  
+        <div class="controls collapsed" id="controlsPanel">
+            <div class="controls-header" id="controlsPanel_" i_onclick="toggleControls()" title="Click [+] to toggle controls">
+                <span class="controls-title">Controls</span>
+                <span class="chain-indicator" id="chainIndicator"></span>
+                <span class="ligand-indicator" id="ligandIndicator"></span>
+                <input type="color" id="backgroundColor" value="#000000" onchange="changeBackground(this.value)" title="Set background color"> .. 
+                <button class="btn btn-small btn-png" onclick="event.stopPropagation(); savePNG();" title="Save PNG with structure info">Save PNG</button>
+                <span onclick="toggleControls()" class="controls-toggle" id="controlsToggle">[+]</span>
+            </div>
+            
+            <div class="controls-content" id="controlsContent" style="height:75px; overflow-y: auto;">
+                <div class="control-group control-group-with-buttons">
+                    <div class="control-left">
+                        <label>Representation:</label>
+                        <select id="representation">
+                            <option value="cartoon">Cartoon</option>
+                            <option value="stick">Ball & Stick</option>
+                            <option value="sphere">Sphere</option>
+                            <option value="line">Wireframe</option>
+                        </select>
+                    <!--/div>
+
+                    <div class="control-left"-->
+                        <label>Color Scheme:</label>
+                        <select id="colorScheme">
+                            <option value="ss">Secondary Structure</option>
+                            <option value="element">Element</option>
+                            <option value="chain">Chain</option>
+                            <option value="plddt" id="plddtOption" style="display: none;">pLDDT (AlphaFold)</option>
+                        </select>
+    </div>
+   
+                    <div class="control-buttons">
+                        <button class="btn btn-small" onclick="centerAndFit()">Center & Fit</button>
+                        <button class="btn btn-small" onclick="clearLabels()">Clear Labels</button>
+                        <!--label>Background:</label-->
+                        <!--input type="color" id="backgroundColor" value="#000000" onchange="changeBackground(this.value)" title="Set background color"-->
+    </div>
+
+    </div>
+            
+            <div class="control-group control-group-inline">
+                <!--label>Color Scheme:</label>
+                <select id="colorScheme">
+                    <option value="ss">Secondary Structure</option>
+                    <option value="element">Element</option>
+                    <option value="chain">Chain</option>
+                    <option value="plddt" id="plddtOption" style="display: none;">pLDDT (AlphaFold)</option>
+                </select-->
+                <label>Surface:</label>
+                <select id="surfaceType">
+                    <option value="none">None</option>
+                    <option value="surface">Surface</option>
+                    <option value="surface-no-water">Surface (-) Water</option>
+                </select>
+                <label>Opacity:</label>
+                <input type="range" id="surfaceOpacity" min="0.30" max="1.0" step="0.1" value="0.7" style="width: 80px;">
+                <span id="opacityValue">0.7</span>
+    </div>
+            
+            <div class="control-group control-group-inline">
+                <div id="ligandsControlWrapper">
+                    <label>Show Ligands:</label>
+                    <input type="checkbox" id="showLigands">
+  </div>
+                <div id="waterControlWrapper">
+                    <label>Show Water:</label>
+                    <input type="checkbox" id="showWater">
+                </div>
+            <!--/div>
+            
+            <div class="control-group"-->
+                <label>Chains:</label>
+                <div id="chainsContainer" class="chains-container">
+                    <!-- Chain checkboxes will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!--div class="control-group">
+                <label>Background:</label>
+                <input type="color" id="backgroundColor" value="#000000" onchange="changeBackground(this.value)">
+            </div-->
+            
+            </div>
+        </div>
+        
+        <!-- Bottom Panel with Structure Info and Copyright -->
+        <div class="bottom-panel">
+            <div class="structure-info-panel">
+                <label>Structure:</label>
+                <span id="structureInfo">-</span>
+            </div>
+            
+            <div class="copyright-panel">
+                <div class="copyright-text">
+                    SUnv-Mol.Vw API v1.0 - September 2025 | Author: Dr. Abdelkrim RACHEDI | © University of Saida - Dr. Moulay Tahar, Saida, Algeria
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <script>
+    let viewer;
+        let currentStructureId = '';
+    let isAlphaFoldModel = false;
+        let currentMoleculeName = '';
+        let currentProteinName = '';
+        let currentDeterminationMethod = '';
+        let currentResolution = '';
+        let currentPlddtConfidence = '';
+        let currentLabels = [];
+        let availableChains = []; // Store available chains for chain indicator
+        let availableLigands = []; // Store available ligands for ligand indicator
+        let currentPdbData = ''; // Store raw PDB data for ligand parsing
+
+        // Initialize viewer
+    function initViewer() {
+      viewer = $3Dmol.createViewer(document.getElementById('viewer'), {
+        defaultView: 'orthographic'
+      });
+            
+            // Set default dark background
+            viewer.setBackgroundColor('#0b1020');
+            
+            // Implement custom mouse controls like the working Mol_Vw.html
+            setupCustomMouseControls();
+            
+            console.log('Viewer initialized:', viewer);
+        }
+
+        // Global variable for accumulated pan translation
+        let accumPan = { x: 0, y: 0 };
+
+        // Setup custom mouse controls - WORKING VERSION FROM Mol_Vw.html
+        function setupCustomMouseControls() {
+            
+            // Get the canvas element
+            const canvas = viewer.getCanvas();
+            if (!canvas) {
+                console.log('Canvas not found for mouse controls');
+                return;
+            }
+            
+            // Prevent context menu
+            canvas.addEventListener('contextmenu', (e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+            });
+            
+            // Right mouse button for translation/panning
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button !== 2) return; // Only right mouse button
+                e.preventDefault(); 
+                e.stopPropagation();
+                
+                let lastX = e.clientX;
+                let lastY = e.clientY;
+                
+                // Create overlay for mouse tracking
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.zIndex = '9999';
+                overlay.style.cursor = 'move';
+                overlay.style.pointerEvents = 'all';
+                document.body.appendChild(overlay);
+                
+                const onMove = (ev) => {
+                    ev.preventDefault(); 
+                    ev.stopPropagation();
+                    const dx = ev.clientX - lastX;
+                    const dy = ev.clientY - lastY;
+                    lastX = ev.clientX;
+                    lastY = ev.clientY;
+                    
+                    if (typeof viewer.translate === 'function') {
+                        // Invert vertical direction: dragging up moves molecule up
+                        viewer.translate(dx, -dy);
+                        accumPan.x += dx;
+                        accumPan.y += -dy;
+                        viewer.render();
+                    }
+                };
+                
+                const finish = (ev) => {
+                    ev.preventDefault(); 
+                    ev.stopPropagation();
+                    overlay.removeEventListener('mousemove', onMove);
+                    overlay.removeEventListener('mouseup', finish);
+                    overlay.removeEventListener('mouseleave', finish);
+                    if (overlay.parentElement) {
+                        overlay.parentElement.removeChild(overlay);
+                    }
+                    // Cancel any latent 3Dmol drag state
+                    try { 
+                        canvas.dispatchEvent(new MouseEvent('mouseup', { bubbles: true })); 
+                    } catch {}
+                };
+                
+                overlay.addEventListener('mousemove', onMove);
+                overlay.addEventListener('mouseup', finish);
+                overlay.addEventListener('mouseleave', finish);
+            });
+            
+            // Expose pan reset function globally (like in Mol_Vw.html)
+            window.__resetPan3dmol = function() {
+                console.log('__resetPan3dmol called, accumPan:', accumPan);
+                if (accumPan.x !== 0 || accumPan.y !== 0) {
+                    if (typeof viewer.translate === 'function') {
+                        // Properly reverse the panning: accumPan contains the total translation
+                        // We need to translate back by the negative of what was accumulated
+                        console.log('Translating back by:', -accumPan.x, -accumPan.y);
+                        viewer.translate(-accumPan.x, -accumPan.y);
+                        accumPan = { x: 0, y: 0 };
+                        viewer.render();
+                        console.log('Pan reset complete');
+                    }
+                } else {
+                    console.log('No pan to reset');
+                }
+            };
+            
+            console.log('Custom mouse controls setup completed');
+        }
+
+        // Setup clickable functionality - WORKING VERSION
+        function setupClickable() {
+            if (window.__clickableSetup) return;
+            window.__clickableSetup = true;
+            
+            console.log('Setting up clickable functionality...');
+            console.log('Viewer object:', viewer);
+            console.log('Viewer.setClickable method:', typeof viewer.setClickable);
+            
+            try {
+                viewer.setClickable({}, true, function(atom, viewer, event, container) {
+                if (!atom) return;
+                
+                console.log('Atom clicked:', atom);
+                
+                // Clear existing labels
+                clearLabels();
+                
+                try {
+                    const model = viewer.getModel();
+                    let caPos = null;
+                    
+                    // Try to find CA atom for the residue
+                    if (model && atom.chain && (typeof atom.resi === 'number')) {
+                        const caAtoms = model.selectedAtoms({ chain: atom.chain, resi: atom.resi, atom: 'CA' }) || [];
+                        if (caAtoms.length) {
+                            const ca = caAtoms[0];
+                            caPos = { x: ca.x, y: ca.y, z: ca.z };
+                        }
+                    }
+                    
+                    const resLabel = `${(atom.resn||'').toUpperCase()}:${atom.resi||''}:${atom.chain||''}`;
+                    const atomName = (atom.atom || atom.atomname || atom.elem || '').toString().toUpperCase();
+                    const atmLabel = `${atomName}:${atom.chain||''}`;
+                    
+                    const common = { 
+                        fontSize: 12, 
+                        fontColor: 'white', 
+                        backgroundColor: 'black', 
+                        backgroundOpacity: 0.8, 
+                        showBackground: true, 
+                        alignment: 'center' 
+                    };
+                    
+                    // Add residue label at CA position if available, otherwise at clicked atom
+                    const resHandle = viewer.addLabel(resLabel, 
+                        caPos ? 
+                            { position: caPos, ...common } : 
+                            { position: { x: atom.x, y: atom.y, z: atom.z }, ...common }
+                    );
+                    
+                    // Add atom label at clicked position
+                    const atmHandle = viewer.addLabel(atmLabel, 
+                        { position: { x: atom.x, y: atom.y, z: atom.z }, ...common }
+                    );
+                    
+                    // Store label handles for cleanup
+                    currentLabels.push(resHandle, atmHandle);
+                    
+                    // Set environment selection (5A radius)
+                    const r = 5.0;
+                    window.__envSelFetch = { within: { distance: r, sel: { serial: atom.serial } } };
+                    viewer.zoomTo(window.__envSelFetch, 500);
+                    updateRendering();
+                    
+                } catch (e) {
+                    console.log('Error creating labels:', e);
+                }
+            });
+            
+            console.log('Clickable functionality setup completed');
+            } catch (e) {
+                console.log('Error setting up clickable functionality:', e);
+            }
+        }
+
+        // Clear all labels
+        function clearLabels() {
+            currentLabels.forEach(label => {
+                try {
+                    viewer.removeLabel(label);
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+            currentLabels = [];
+        }
+
+        // Save PNG with structure information overlay
+        async function savePNG() {
+            try {
+                console.log('Starting PNG export...');
+                
+                // Get structure information
+                const structureInfo = getStructureInfo();
+                console.log('PNG Export - Structure Info:', structureInfo);
+                console.log('PNG Export - Current pLDDT Confidence:', currentPlddtConfidence);
+                console.log('PNG Export - Current Resolution:', currentResolution);
+                console.log('PNG Export - Current Determination Method:', currentDeterminationMethod);
+                
+                // Capture the viewer canvas
+                const viewerElement = document.getElementById('viewer');
+                const canvas = await html2canvas(viewerElement, {
+                    backgroundColor: document.getElementById('backgroundColor').value,
+                    scale: 2, // Higher resolution
+                    useCORS: true,
+                    allowTaint: true
+                });
+                
+                // Create a new canvas for the final image with overlay
+                const finalCanvas = document.createElement('canvas');
+                const ctx = finalCanvas.getContext('2d');
+                
+                // Set canvas size
+                finalCanvas.width = canvas.width;
+                finalCanvas.height = canvas.height;
+                
+                // Draw the original canvas
+                ctx.drawImage(canvas, 0, 0);
+                
+                // Calculate overlay height based on content
+                let overlayHeight = 160;
+                let textY = finalCanvas.height - 140;
+                
+                // Add structure information overlay (larger to accommodate more info)
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(finalCanvas.width - 320, finalCanvas.height - overlayHeight, 320, overlayHeight);
+                
+                // Add pLDDT color keys in top-right for AlphaFold structures
+                if (isAlphaFoldModel && structureInfo.confidence) {
+                    // Create separate overlay for color keys in top-right
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    ctx.fillRect(finalCanvas.width - 200, 10, 190, 120);
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.fillText('pLDDT Confidence Colors:', finalCanvas.width - 190, 25);
+                    
+                    ctx.font = '9px Arial';
+                    const colors = [
+                        { color: '#4343e7', label: 'Very High (90-100)' },
+                        { color: '#56acf8', label: 'Confident (70-90)' },
+                        { color: '#ffcc00', label: 'Low (50-70)' },
+                        { color: '#ff8800', label: 'Very Low (0-50)' },
+                        { color: '#ff0000', label: 'Very Low (0-50)' }
+                    ];
+                    
+                    colors.forEach((item, index) => {
+                        const y = 40 + (index * 15);
+                        // Draw color square
+                        ctx.fillStyle = item.color;
+                        ctx.fillRect(finalCanvas.width - 190, y - 8, 8, 8);
+                        // Draw label
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(item.label, finalCanvas.width - 180, y);
+                    });
+                }
+                
+                // Add text overlay
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(structureInfo.title, finalCanvas.width - 310, textY);
+                
+                ctx.font = '12px Arial';
+                ctx.fillText(structureInfo.id, finalCanvas.width - 310, textY + 20);
+                
+                if (structureInfo.type) {
+                    ctx.fillText(structureInfo.type, finalCanvas.width - 310, textY + 40);
+                }
+                
+                // Add determination method and resolution for PDB structures
+                if (structureInfo.determination) {
+                    ctx.fillText(`Method: ${structureInfo.determination}`, finalCanvas.width - 310, textY + 60);
+                }
+                
+                // Only show resolution if it exists (not for NMR structures, but yes for X-ray and Cryo-EM)
+                // Examples: X-ray (4DFR: 1.70 Å, 6XYZ: 1.63 Å), Cryo-EM (9MFE: 3.22 Å)
+                if (structureInfo.resolution) {
+                    ctx.fillText(`Resolution: ${structureInfo.resolution}`, finalCanvas.width - 310, textY + 80);
+                }
+                
+                if (structureInfo.confidence) {
+                    ctx.fillText(structureInfo.confidence, finalCanvas.width - 310, textY + 100);
+                }
+                
+                // Add copyright
+                ctx.font = '10px Arial';
+                ctx.fillText('© 2025 University of Saida - Dr. Moulay Tahar, Saida, Algeria', finalCanvas.width - 310, finalCanvas.height - 20);
+                
+                // Add timestamp
+                const timestamp = new Date().toLocaleString();
+                ctx.fillText(`Generated: ${timestamp}`, finalCanvas.width - 310, finalCanvas.height - 5);
+                
+                // Download the image
+                const link = document.createElement('a');
+                link.download = `${structureInfo.id}_structure.png`;
+                link.href = finalCanvas.toDataURL('image/png');
+                link.click();
+                
+                console.log('PNG export completed successfully');
+                
+      } catch (error) {
+                console.error('Error saving PNG:', error);
+                alert('Error saving PNG image. Please try again.');
+            }
+        }
+
+        // Get structure information for overlay
+        function getStructureInfo() {
+            const structureId = currentStructureId || 'Unknown';
+            const isAlphaFold = isAlphaFoldModel;
+            
+            let info = {
+                id: structureId,
+                title: '',
+                type: '',
+                confidence: '',
+                determination: '',
+                resolution: ''
+            };
+            
+            if (isAlphaFold) {
+                info.title = currentProteinName || 'AlphaFold Predicted Structure';
+                info.type = 'AI Predicted Model';
+                info.confidence = currentPlddtConfidence || 'pLDDT confidence scores available';
+            } else {
+                info.title = currentMoleculeName || 'PDB Structure';
+                info.type = 'Experimental Structure';
+                info.determination = currentDeterminationMethod || 'Unknown method';
+                // Only show resolution if it exists (not for NMR structures)
+                info.resolution = currentResolution || '';
+            }
+            
+            return info;
+        }
+
+        // Toggle surface display
+        function toggleSurface() {
+            const surfaceType = document.getElementById('surfaceType').value;
+            const currentColorScheme = document.getElementById('colorScheme').value;
+            const opacity = parseFloat(document.getElementById('surfaceOpacity').value);
+            
+            // Get visible chains for surface application
+            const checkboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]');
+            const visibleChains = [];
+            
+            // If no checkboxes found, this is a single chain - apply to all atoms
+            if (checkboxes.length === 0) {
+                visibleChains.push('*'); // Use wildcard for single chain
+            } else {
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        visibleChains.push(checkbox.value);
+                    }
+                });
+            }
+            
+            // Remove any existing surfaces first
+            viewer.removeAllSurfaces();
+            
+            if (surfaceType === 'surface') {
+                // Surface with all atoms including water
+                if (currentColorScheme === 'plddt') {
+                    if (visibleChains.length === 1 && visibleChains[0] === '*') {
+                        // Single chain - apply to all atoms
+                        viewer.addSurface($3Dmol.SurfaceType.VDW, { 
+                            opacity: opacity,
+                            colorfunc: plddtColor
+                        }, {});
+                    } else {
+                        // Multi-chain - apply to visible chains only
+                        viewer.addSurface($3Dmol.SurfaceType.VDW, { 
+                            opacity: opacity,
+                            colorfunc: plddtColor
+                        }, { chain: visibleChains });
+                    }
+                } else {
+                    if (visibleChains.length === 1 && visibleChains[0] === '*') {
+                        // Single chain - apply to all atoms
+                        viewer.addSurface($3Dmol.SurfaceType.VDW, { 
+                            opacity: opacity,
+                            colorscheme: currentColorScheme
+                        }, {});
+                    } else {
+                        // Multi-chain - apply to visible chains only
+                        viewer.addSurface($3Dmol.SurfaceType.VDW, { 
+                            opacity: opacity,
+                            colorscheme: currentColorScheme
+                        }, { chain: visibleChains });
+                    }
+                }
+            } else if (surfaceType === 'surface-no-water') {
+                // Surface excluding water molecules
+                if (currentColorScheme === 'plddt') {
+                    if (visibleChains.length === 1 && visibleChains[0] === '*') {
+                        // Single chain - apply to all atoms except water
+                        viewer.addSurface($3Dmol.SurfaceType.VDW, { 
+                            opacity: opacity,
+                            colorfunc: plddtColor
+                        }, { not: { resn: 'HOH' } });
+                    } else {
+                        // Multi-chain - apply to visible chains only, excluding water
+                        viewer.addSurface($3Dmol.SurfaceType.VDW, { 
+                            opacity: opacity,
+                            colorfunc: plddtColor
+                        }, { chain: visibleChains, not: { resn: 'HOH' } });
+                    }
+                } else {
+                    if (visibleChains.length === 1 && visibleChains[0] === '*') {
+                        // Single chain - apply to all atoms except water
+                        viewer.addSurface($3Dmol.SurfaceType.VDW, { 
+                            opacity: opacity,
+                            colorscheme: currentColorScheme
+                        }, { not: { resn: 'HOH' } });
+                    } else {
+                        // Multi-chain - apply to visible chains only, excluding water
+                        viewer.addSurface($3Dmol.SurfaceType.VDW, { 
+                            opacity: opacity,
+                            colorscheme: currentColorScheme
+                        }, { chain: visibleChains, not: { resn: 'HOH' } });
+                    }
+                }
+            }
+            // If surfaceType === 'none', no surface is added (already removed above)
+            
+            updateRendering();
+        }
+
+        // Update rendering
+        function updateRendering() {
+            viewer.render();
+        }
+
+        // Update chain indicator in Controls banner
+        function updateChainIndicator() {
+            const chainIndicator = document.getElementById('chainIndicator');
+            if (!chainIndicator) return;
+            
+            if (availableChains.length === 0) {
+                // No chains available yet
+                chainIndicator.innerHTML = '';
+                return;
+            }
+            
+            if (availableChains.length === 1) {
+                // Single chain structure
+                chainIndicator.innerHTML = `[Chain: <span class="chain-name selected">${availableChains[0]}</span>]`;
+            } else {
+                // Multi-chain structure - get selection status from checkboxes
+                const selectedChains = new Set();
+                const checkboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]');
+                
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        selectedChains.add(checkbox.value);
+                    }
+                });
+                
+                // Build HTML with bold formatting for selected chains
+                const chainElements = availableChains.map(chain => {
+                    const isSelected = selectedChains.has(chain);
+                    const className = isSelected ? 'chain-name selected' : 'chain-name';
+                    return `<span class="${className}">${chain}</span>`;
+                });
+                
+                chainIndicator.innerHTML = `[Chains: ${chainElements.join(', ')}]`;
+            }
+        }
+
+        // Update ligand indicator in Controls banner
+        function updateLigandIndicator() {
+            const ligandIndicator = document.getElementById('ligandIndicator');
+            if (!ligandIndicator) return;
+            
+            if (availableLigands.length === 0) {
+                // No ligands available
+                ligandIndicator.innerHTML = '[Ligands: no ligands]';
+                return;
+            }
+            
+            // Get current ligand display status
+            const showLigands = document.getElementById('showLigands').checked;
+            
+            // Get currently visible chains
+            const visibleChains = new Set();
+            const checkboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]');
+            
+            if (checkboxes.length === 0) {
+                // Single chain structure - assume chain A is visible
+                visibleChains.add('A');
+            } else {
+                // Multi-chain structure - get checked chains
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        visibleChains.add(checkbox.value);
+                    }
+                });
+            }
+            
+            // Build HTML with bold formatting for visible ligands only
+            const ligandElements = availableLigands.map(ligand => {
+                // Extract chain from ligand (format: "LIGAND_NAME:CHAIN_ID")
+                const ligandChain = ligand.split(':')[1];
+                const isLigandVisible = showLigands && visibleChains.has(ligandChain);
+                const className = isLigandVisible ? 'ligand-name selected' : 'ligand-name';
+                return `<span class="${className}">${ligand}</span>`;
+            });
+            
+            ligandIndicator.innerHTML = `[Ligands: ${ligandElements.join(', ')}]`;
+        }
+        
+        // Simple function to hide/show ligands control based on ligand availability
+        function updateLigandsControlVisibility() {
+            const ligandsWrapper = document.getElementById('ligandsControlWrapper');
+            if (ligandsWrapper) {
+                if (availableLigands.length === 0) {
+                    ligandsWrapper.style.display = 'none';
+                } else {
+                    ligandsWrapper.style.display = 'inline-block';
+                }
+            }
+        }
+        
+        // Simple function to hide/show water control based on water availability
+        function updateWaterControlVisibility() {
+            const waterWrapper = document.getElementById('waterControlWrapper');
+            if (waterWrapper) {
+                // Check if water molecules exist in the structure
+                const hasWater = checkForWaterMolecules();
+                if (!hasWater) {
+                    waterWrapper.style.display = 'none';
+                } else {
+                    waterWrapper.style.display = 'inline-block';
+                }
+            }
+        }
+        
+        // Simple function to check for water molecules
+        function checkForWaterMolecules() {
+            if (currentPdbData) {
+                // Check raw PDB data for water molecules
+                return currentPdbData.includes('HOH') || currentPdbData.includes('WAT');
+            }
+            return false;
+        }
+
+        // Parse ligands directly from raw PDB data
+        function parseLigandsFromPdbData(pdbData) {
+            const ligands = new Set();
+            
+            if (!pdbData) {
+                console.log('No PDB data available for ligand parsing');
+                return [];
+            }
+            
+            console.log('Parsing ligands from raw PDB data...');
+            
+            const lines = pdbData.split('\n');
+            console.log('PDB file has', lines.length, 'lines');
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                // Look for HETATM records (ligands)
+                if (line.startsWith('HETATM')) {
+                    // Extract residue name and chain ID
+                    const resn = line.substring(17, 20).trim(); // Residue name
+                    const chain = line.substring(21, 22).trim(); // Chain ID
+                    
+                    // Skip water molecules
+                    if (resn !== 'HOH' && resn !== 'WAT') {
+                        const ligandId = `${resn}:${chain}`;
+                        ligands.add(ligandId);
+                        console.log('Found ligand:', ligandId);
+                    }
+                }
+            }
+            
+            const ligandList = Array.from(ligands).sort();
+            console.log('Parsed ligands from PDB:', ligandList);
+            return ligandList;
+        }
+
+        // Detect and store available ligands from the loaded structure
+        function detectAvailableLigands() {
+            availableLigands = [];
+            
+            try {
+                console.log('Starting ligand detection...');
+                
+                // First try parsing from raw PDB data (most reliable)
+                if (currentPdbData) {
+                    availableLigands = parseLigandsFromPdbData(currentPdbData);
+                    console.log('Ligands detected from raw PDB data:', availableLigands);
+                } else {
+                    console.log('No raw PDB data available, trying model approach...');
+                    
+                    // Fallback to model-based approach
+                    const models = viewer.getModels();
+                    
+                    if (models && models.length > 0) {
+                        const model = models[0];
+                        const ligands = new Set();
+                        
+                        // Try to get atoms from the model
+                        let allAtoms = [];
+                        
+                        // Method 1: Try model.getAtoms()
+                        try {
+                            allAtoms = model.getAtoms();
+                            console.log('Got atoms via model.getAtoms():', allAtoms.length);
+                        } catch (e) {
+                            console.log('model.getAtoms() failed:', e);
+                        }
+                        
+                        // Method 2: Try model.atoms
+                        if (allAtoms.length === 0) {
+                            try {
+                                allAtoms = model.atoms || [];
+                                console.log('Got atoms via model.atoms:', allAtoms.length);
+                            } catch (e) {
+                                console.log('model.atoms failed:', e);
+                            }
+                        }
+                        
+                        // Method 3: Try model.selectedAtoms
+                        if (allAtoms.length === 0) {
+                            try {
+                                allAtoms = model.selectedAtoms || [];
+                                console.log('Got atoms via model.selectedAtoms:', allAtoms.length);
+                            } catch (e) {
+                                console.log('model.selectedAtoms failed:', e);
+                            }
+                        }
+                        
+                        if (allAtoms.length > 0) {
+                            // Process atoms efficiently with timeout check
+                            const startTime = Date.now();
+                            
+                            for (let i = 0; i < allAtoms.length; i++) {
+                                // Check if we're taking too long
+                                if (Date.now() - startTime > 1000) {
+                                    console.log('Ligand detection timeout - stopping');
+              break;
+            }
+                                
+                                const atom = allAtoms[i];
+                                console.log('Processing atom:', atom);
+                                
+                                if (atom && atom.hetflag && atom.resn && atom.resn !== 'HOH' && atom.chain) {
+                                    // Format: LIGAND_NAME:CHAIN_ID
+                                    const ligandId = `${atom.resn}:${atom.chain}`;
+                                    ligands.add(ligandId);
+                                    console.log('Added ligand:', ligandId);
+                                }
+                            }
+                            
+                            // Sort ligands alphabetically
+                            availableLigands = Array.from(ligands).sort();
+                            console.log('Final detected ligands:', availableLigands);
+                        } else {
+                            console.log('No atoms found in any method');
+                        }
+                    } else {
+                        console.log('No models found');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error detecting ligands:', error);
+                availableLigands = [];
+            }
+            
+            // Update ligand indicator
+            updateLigandIndicator();
+            
+            // Update control visibility
+            updateLigandsControlVisibility();
+            updateWaterControlVisibility();
+        }
+
+        // Reset pan translation - SIMPLIFIED VERSION
+        function resetPan() {
+            console.log('Resetting pan translation...');
+            
+            // Only use the custom pan reset function to avoid conflicts
+            if (window.__resetPan3dmol) {
+                window.__resetPan3dmol();
+                console.log('Custom pan reset applied');
+            } else {
+                console.log('No custom pan reset function available');
+            }
+            
+            console.log('Pan reset complete');
+        }
+
+        // Center and fit - DIRECT PAN RESET VERSION
+        function centerAndFit() {
+            console.log('Centering and fitting structure...');
+            
+            // Clear any existing labels from picking events
+            clearLabels();
+            
+            // Reset pan translation using direct translation
+            if (accumPan.x !== 0 || accumPan.y !== 0) {
+                console.log('Resetting pan by translating back:', -accumPan.x, -accumPan.y);
+                if (typeof viewer.translate === 'function') {
+                    viewer.translate(-accumPan.x, -accumPan.y);
+                    console.log('Pan reset via direct translation');
+                }
+            }
+            
+            // Reset the accumulated pan tracking
+            accumPan = { x: 0, y: 0 };
+            
+            // Also try the built-in reset methods for rotation and zoom
+            try {
+                if (typeof viewer.setViewMatrix === 'function') {
+                    viewer.setViewMatrix();
+                    console.log('View matrix reset');
+                }
+                
+                if (typeof viewer.resetView === 'function') {
+                    viewer.resetView();
+                    console.log('Camera reset');
+                }
+                
+                if (typeof viewer.rotate === 'function') {
+                    viewer.rotate(0, 0, 0);
+                    console.log('Rotation reset');
+                }
+                
+            } catch (error) {
+                console.log('Some reset methods not available:', error);
+            }
+            
+            // Get visible chains for centering
+            const checkboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]');
+            const visibleChains = [];
+            
+            // If no checkboxes found, this is a single chain - center on all atoms
+            if (checkboxes.length === 0) {
+                viewer.zoomTo();
+                console.log('Centered on single chain structure');
+              } else {
+                // Multi-chain - center only on visible chains
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        visibleChains.push(checkbox.value);
+                    }
+                });
+                
+                if (visibleChains.length > 0) {
+                    // Build selection for visible chains
+                    if (visibleChains.length === 1) {
+                        viewer.zoomTo({ chain: visibleChains[0] });
+                        console.log('Centered on chain:', visibleChains[0]);
+                    } else {
+                        // Multiple chains - use OR selection
+                        const ors = visibleChains.map(chain => ({ chain: chain }));
+                        viewer.zoomTo({ or: ors });
+                        console.log('Centered on chains:', visibleChains);
+            }
+          } else {
+                    // No chains selected - center on all
+                    viewer.zoomTo();
+                    console.log('Centered on all atoms (no chains selected)');
+                }
+            }
+            
+            viewer.render();
+            console.log('Structure centered and fitted');
+        }
+        
+        // Helper function to get atomic mass
+        function getAtomicMass(element) {
+            const atomicMasses = {
+                'H': 1.008, 'C': 12.011, 'N': 14.007, 'O': 15.999, 'P': 30.974,
+                'S': 32.065, 'F': 18.998, 'Cl': 35.453, 'Br': 79.904, 'I': 126.904,
+                'Na': 22.990, 'Mg': 24.305, 'K': 39.098, 'Ca': 40.078, 'Fe': 55.845,
+                'Zn': 65.409, 'Cu': 63.546, 'Mn': 54.938, 'Co': 58.933, 'Ni': 58.693
+            };
+            return atomicMasses[element] || 1.0; // Default mass if element not found
+        }
+
+        // Change background color
+        function changeBackground(color) {
+            viewer.setBackgroundColor(color);
+            updateRendering();
+        }
+        
+        // Toggle controls panel
+        function toggleControls() {
+            const controlsPanel = document.getElementById('controlsPanel');
+            const controlsToggle = document.getElementById('controlsToggle');
+            const body = document.body;
+            const viewerElement = document.getElementById('viewer');
+            
+            controlsPanel.classList.toggle('collapsed');
+            
+            if (controlsPanel.classList.contains('collapsed')) {
+                // Collapsed state - remove draggable and reset position
+                controlsPanel.classList.remove('draggable');
+                controlsPanel.style.position = '';
+                controlsPanel.style.top = '';
+                controlsPanel.style.left = '';
+                controlsPanel.style.transform = '';
+                controlsPanel.style.width = '';
+                controlsPanel.style.height = '';
+                controlsToggle.textContent = '[+]';
+                controlsToggle.style.rotate = '0deg';
+                controlsToggle.style.paddingRight = '10px';
+                body.classList.add('viewer-expanded');
+                // Expand viewer to maximum height
+                viewerElement.style.height = 'calc(100vh - 60px)';
+            } else {
+                // Expanded state - make draggable and resizable
+                controlsPanel.classList.add('draggable');
+                controlsPanel.style.position = 'fixed';
+                controlsPanel.style.top = '50%';
+                controlsPanel.style.left = '50%';
+                controlsPanel.style.transform = 'translate(-50%, -50%)';
+                controlsPanel.style.height = '130px';//'auto';
+                controlsPanel.style.width = '1150px';
+                //height: 130px; width: 1150px;
+                controlsPanel_.title="Click [-] to toggle controls off";
+                controlsToggle.title=controlsPanel_.title;//"Click [-] to toggle controls off";
+                controlsToggle.textContent = '[−]';
+                controlsToggle.style.paddingRight = '10px';
+                controlsToggle.style.rotate = '180deg';
+                body.classList.remove('viewer-expanded');
+                // Keep viewer at same height - don't change it
+                viewerElement.style.height = 'calc(100vh - 60px)';
+                
+                // Make draggable
+                makeControlsDraggable();
+            }
+            
+            // Resize viewer after animation
+            setTimeout(() => {
+                if (viewer && viewer.resize) {
+                    viewer.resize();
+                }
+            }, 300);
+        }
+        
+        // Make controls panel draggable and resizable
+        function makeControlsDraggable() {
+            const controlsPanel = document.getElementById('controlsPanel');
+            const controlsHeader = document.querySelector('.controls-header');
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+            
+            // Remove existing listeners to prevent duplicates
+            //controlsHeader.removeEventListener('mousedown', dragStart);
+            //document.removeEventListener('mousemove', drag);
+            //document.removeEventListener('mouseup', dragEnd);
+            //controlsPanel.removeEventListener('resize', handleResize);
+            
+            controlsHeader.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+            //controlsPanel.addEventListener('resize', handleResize);
+            
+            function dragStart(e) {
+                if (e.target === controlsToggle) return; // Don't drag when clicking toggle button
+                
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+                
+                if (e.target === controlsHeader || controlsHeader.contains(e.target)) {
+                    isDragging = true;
+                    controlsPanel.classList.add('dragging');
+                }
+            }
+            
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                    
+                    xOffset = currentX;
+                    yOffset = currentY;
+                    
+                    controlsPanel.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                }
+            }
+            
+            function dragEnd(e) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                controlsPanel.classList.remove('dragging');
+            }
+            
+            function handleResize(e) {
+                controlsPanel.classList.add('resizing');
+                // Trigger viewer resize after panel resize
+                setTimeout(() => {
+                    if (viewer && viewer.resize) {
+                        viewer.resize();
+                    }
+                    controlsPanel.classList.remove('resizing');
+                }, 100);
+            }
+        }
+        
+        // Update structure information display
+        function updateStructureInfo(structureId, moleculeName = '', isAlphaFold = false) {
+            const structureInfoElement = document.getElementById('structureInfo');
+            let infoText = structureId;
+            
+            // Store molecule names globally for PNG export
+            if (isAlphaFold) {
+                currentProteinName = moleculeName;
+            } else {
+                currentMoleculeName = moleculeName;
+            }
+            
+            if (moleculeName && moleculeName !== 'Unknown protein') {
+                infoText += ` - ${moleculeName}`;
+            }
+            
+            if (isAlphaFold) {
+                infoText += ' (AI Predicted Model)';
+            } else {
+                // Add determination method and resolution for PDB structures
+                if (currentDeterminationMethod) {
+                    infoText += ` [${currentDeterminationMethod}`;
+                    if (currentResolution) {
+                        infoText += `, ${currentResolution}`;
+                    }
+                    infoText += ']';
+                }
+            }
+            
+            structureInfoElement.textContent = infoText;
+        }
+        
+        // Setup chain controls
+        function setupChainControls() {
+            const chainsContainer = document.getElementById('chainsContainer');
+            chainsContainer.innerHTML = '';
+            
+            try {
+                // Try different methods to get models
+                let models = null;
+                if (viewer.getModels && typeof viewer.getModels === 'function') {
+                    models = viewer.getModels();
+                } else if (viewer.models && Array.isArray(viewer.models)) {
+                    models = viewer.models;
+                } else if (viewer.getModel && typeof viewer.getModel === 'function') {
+                    models = [viewer.getModel()];
+                }
+                
+                if (models && models.length > 0) {
+                    const model = models[0];
+                    const chains = new Set();
+                    
+                    // Get all unique chains from the model
+                    let atoms = [];
+                    if (model.selectedAtoms && typeof model.selectedAtoms === 'function') {
+                        atoms = model.selectedAtoms({});
+                    } else if (model.atoms && Array.isArray(model.atoms)) {
+                        atoms = model.atoms;
+                    }
+                    
+                    atoms.forEach(atom => {
+                        if (atom.chain) {
+                            chains.add(atom.chain);
+                        }
+                    });
+                    
+                    const sortedChains = Array.from(chains).sort();
+                    
+                    if (sortedChains.length > 1) {
+                        // Store available chains globally
+                        availableChains = [...sortedChains];
+                        
+                        // Multiple chains - show chain controls
+                        sortedChains.forEach((chain, index) => {
+                            const chainDiv = document.createElement('div');
+                            chainDiv.className = 'chain-checkbox';
+                            
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.id = `chain-${chain}`;
+                            checkbox.value = chain;
+                            checkbox.checked = true; // All chains ON by default
+                            
+                            const label = document.createElement('label');
+                            label.htmlFor = `chain-${chain}`;
+                            label.textContent = chain;
+                            
+                            chainDiv.appendChild(checkbox);
+                            chainDiv.appendChild(label);
+                            chainsContainer.appendChild(chainDiv);
+                            
+                            // Add event listener
+                            checkbox.addEventListener('change', function() {
+                                // Update "All" checkbox state based on individual chain selections
+                                updateAllCheckboxState();
+                                updateChainDisplay();
+                            });
+                        });
+                        
+                        // Add "All" checkbox last
+                        const allDiv = document.createElement('div');
+                        allDiv.className = 'chain-checkbox';
+                        
+                        const allCheckbox = document.createElement('input');
+                        allCheckbox.type = 'checkbox';
+                        allCheckbox.id = 'chain-all';
+                        allCheckbox.value = 'all';
+                        allCheckbox.checked = true; // ON by default (all chains selected)
+                        
+                        const allLabel = document.createElement('label');
+                        allLabel.htmlFor = 'chain-all';
+                        allLabel.textContent = 'All';
+                        
+                        allDiv.appendChild(allCheckbox);
+                        allDiv.appendChild(allLabel);
+                        chainsContainer.appendChild(allDiv);
+                        
+                        // Add event listener for "All" checkbox
+                        allCheckbox.addEventListener('change', function() {
+                            const isChecked = this.checked;
+                            const chainCheckboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]:not(#chain-all)');
+                            
+                            chainCheckboxes.forEach(checkbox => {
+                                if (isChecked) {
+                                    // Select all chains
+                                    checkbox.checked = true;
+                                } else {
+                                    // Unselect all except chain A
+                                    checkbox.checked = checkbox.value === 'A';
+                                }
+                            });
+                            
+                            updateChainDisplay();
+                        });
+                        
+                        // Apply initial chain display (all chains visible by default)
+                        setTimeout(() => {
+                            updateChainDisplay();
+                        }, 100);
+                        
+                        // Update chain indicator for multi-chain
+                        updateChainIndicator();
+                        
+                        // Detect and update ligand indicator with shorter delay
+                        setTimeout(() => {
+                            detectAvailableLigands();
+                        }, 50);
+                    } else {
+                        // Single chain - hide chain controls
+                        availableChains = ['A']; // Store single chain
+                        chainsContainer.innerHTML = '<span style="font-size: 11px; color: #666;">Single chain</span>';
+                        
+                        // Update chain indicator for single chain
+                        updateChainIndicator();
+                        
+                        // Detect and update ligand indicator with shorter delay
+                        setTimeout(() => {
+                            detectAvailableLigands();
+                        }, 50);
+                    }
+                } else {
+                    // No models found
+                    chainsContainer.innerHTML = '<span style="font-size: 11px; color: #666;">No chains detected</span>';
+                }
+      } catch (error) {
+                console.error('Error setting up chain controls:', error);
+                chainsContainer.innerHTML = '<span style="font-size: 11px; color: #666;">Chain detection failed</span>';
+            }
+        }
+        
+        // Get van der Waals radius for single-atom ligands
+        function getVdwRadius(element) {
+            const vdwRadii = {
+                'H': 1.20, 'C': 1.70, 'N': 1.55, 'O': 1.52, 'F': 1.47,
+                'P': 1.80, 'S': 1.80, 'CL': 1.75, 'BR': 1.85, 'I': 1.98,
+                'CA': 2.31, 'MG': 1.73, 'ZN': 1.39, 'FE': 2.00, 'CU': 1.40,
+                'MN': 1.79, 'NI': 1.63, 'CO': 1.61, 'CD': 1.58, 'HG': 1.55,
+                'PB': 2.02, 'AG': 1.72, 'AU': 1.66, 'PT': 1.75, 'PD': 1.63,
+                'K': 2.75, 'NA': 2.27, 'LI': 1.82, 'RB': 3.03, 'CS': 3.43,
+                'BE': 1.53, 'AL': 1.84, 'GA': 1.87, 'IN': 1.93, 'TL': 1.96,
+                'SI': 2.10, 'GE': 2.11, 'SN': 2.17, 'AS': 1.85,
+                'SB': 2.06, 'BI': 2.07, 'SE': 1.90, 'TE': 2.06, 'PO': 1.97,
+                'AT': 2.02, 'RN': 2.20, 'FR': 3.48, 'RA': 2.83, 'AC': 2.47,
+                'TH': 2.45, 'PA': 2.43, 'U': 2.41, 'NP': 2.39, 'PU': 2.43,
+                'AM': 2.44, 'CM': 2.45, 'BK': 2.44, 'CF': 2.45, 'ES': 2.45,
+                'FM': 2.45, 'MD': 2.46, 'NO': 2.46, 'LR': 2.46, 'RF': 2.46,
+                'DB': 2.46, 'SG': 2.46, 'BH': 2.46, 'HS': 2.46, 'MT': 2.46,
+                'DS': 2.46, 'RG': 2.46, 'CN': 2.46, 'NH': 2.46, 'FL': 2.46,
+                'MC': 2.46, 'LV': 2.46, 'TS': 2.46, 'OG': 2.46
+            };
+            
+            return vdwRadii[element.toUpperCase()] || 1.70; // Default to carbon radius
+        }
+
+        // Check if a ligand is a single-atom ligand
+        function isSingleAtomLigand(ligandName) {
+            const singleAtomLigands = [
+                'CA', 'CL', 'ZN', 'MG', 'FE', 'CU', 'MN', 'NI', 'CO', 'CD',
+                'HG', 'PB', 'AG', 'AU', 'PT', 'PD', 'K', 'NA', 'LI', 'RB',
+                'CS', 'BE', 'AL', 'GA', 'IN', 'TL', 'SI', 'GE', 'SN', 'AS',
+                'SB', 'BI', 'SE', 'TE', 'PO', 'AT', 'RN', 'FR', 'RA', 'AC',
+                'TH', 'PA', 'U', 'NP', 'PU', 'AM', 'CM', 'BK', 'CF', 'ES',
+                'FM', 'MD', 'NO', 'LR', 'RF', 'DB', 'SG', 'BH', 'HS', 'MT',
+                'DS', 'RG', 'CN', 'NH', 'FL', 'MC', 'LV', 'TS', 'OG'
+            ];
+            
+            return singleAtomLigands.includes(ligandName.toUpperCase());
+        }
+        
+        // Update "All" checkbox state based on individual chain selections
+        function updateAllCheckboxState() {
+            const allCheckbox = document.getElementById('chain-all');
+            if (!allCheckbox) return;
+            
+            const chainCheckboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]:not(#chain-all)');
+            const checkedChains = Array.from(chainCheckboxes).filter(cb => cb.checked);
+            
+            // "All" should be checked only if all chains are selected
+            allCheckbox.checked = checkedChains.length === chainCheckboxes.length;
+        }
+        function updateChainDisplay() {
+            const checkboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]:not(#chain-all)');
+            const visibleChains = [];
+            
+            // If no checkboxes found, this is a single chain - don't apply any filtering
+            if (checkboxes.length === 0) {
+                // For single chain, apply ligand and water settings without chain filtering
+                const showLigands = document.getElementById('showLigands').checked;
+                const showWater = document.getElementById('showWater').checked;
+                
+                if (showLigands) {
+                    // For single chain, all ligands are visible (chain A)
+                    const visibleLigands = availableLigands.filter(ligand => {
+                        const ligandChain = ligand.split(':')[1];
+                        return ligandChain === 'A'; // Single chain is always chain A
+                    });
+                    
+                    // Display single-atom ligands as spheres with VDW radii
+                    const singleAtomLigands = visibleLigands.filter(ligand => {
+                        const ligandName = ligand.split(':')[0];
+                        return isSingleAtomLigand(ligandName);
+                    });
+                    
+                    // Display multi-atom ligands as sticks
+                    const multiAtomLigands = visibleLigands.filter(ligand => {
+                        const ligandName = ligand.split(':')[0];
+                        return !isSingleAtomLigand(ligandName);
+                    });
+                    
+                    // Apply sphere style to single-atom ligands
+                    singleAtomLigands.forEach(ligand => {
+                        const ligandName = ligand.split(':')[0];
+                        const vdwRadius = getVdwRadius(ligandName);
+                        const scale = vdwRadius * 0.3; // Single-atom ligands displayed at 0.3 of standard VDW radius for optimal visibility
+                        
+                        viewer.setStyle({ 
+                            hetflag: true, 
+                            resn: ligandName
+                        }, { 
+                            sphere: { 
+                                colorscheme: 'element',
+                                scale: scale
+                            } 
+                        });
+                    });
+                    
+                    // Apply stick style to multi-atom ligands
+                    if (multiAtomLigands.length > 0) {
+                        const multiAtomResns = multiAtomLigands.map(ligand => ligand.split(':')[0]);
+                        viewer.setStyle({ 
+                            hetflag: true, 
+                            resn: multiAtomResns
+                        }, { 
+                            stick: { 
+                                colorscheme: 'element' 
+                            } 
+                        });
+                    }
+        } else {
+                    // Hide ligands if not selected
+                    viewer.setStyle({ hetflag: true, not: { resn: 'HOH' } }, {});
+                }
+                if (showWater) {
+                    viewer.setStyle({ resn: 'HOH' }, { 
+                        sphere: { 
+                            colorscheme: 'element',
+                            scale: 0.15
+                        } 
+                    });
+                } else {
+                    // Hide water if not selected
+                    viewer.setStyle({ resn: 'HOH' }, {});
+                }
+                
+                // Apply default representation and color scheme for single chain
+                const currentRep = document.getElementById('representation').value;
+                const currentColorScheme = document.getElementById('colorScheme').value;
+                
+                // Map color scheme names to 3Dmol.js values
+                let colorschemeValue;
+                switch(currentColorScheme) {
+                    case 'ss':
+                        colorschemeValue = 'ssPyMol';
+                        break;
+                    case 'element':
+                        colorschemeValue = 'element';
+                        break;
+                    case 'chain':
+                        colorschemeValue = 'chain';
+                        break;
+                    case 'plddt':
+                        colorschemeValue = 'plddt';
+                        break;
+                    default:
+                        colorschemeValue = 'ssPyMol';
+                }
+                
+                // Apply style to single chain
+                const style = {};
+                if (currentRep === 'cartoon') {
+                    if (currentColorScheme === 'plddt') {
+                        style.cartoon = { 
+                            colorfunc: plddtColor,
+                            arrows: true
+                        };
+                    } else {
+                        style.cartoon = { 
+                            colorscheme: colorschemeValue,
+                            arrows: true
+                        };
+                    }
+                } else if (currentRep === 'stick') {
+                    if (currentColorScheme === 'plddt') {
+                        style.stick = { 
+                            colorfunc: plddtColor,
+                            radius: 0.2
+                        };
+                    } else {
+                        style.stick = { 
+                            colorscheme: colorschemeValue,
+                            radius: 0.2
+                        };
+                    }
+                } else if (currentRep === 'sphere') {
+                    if (currentColorScheme === 'plddt') {
+                        style.sphere = { 
+                            colorfunc: plddtColor,
+                            scale: 1.0
+                        };
+                    } else {
+                        style.sphere = { 
+                            colorscheme: colorschemeValue,
+                            scale: 1.0
+                        };
+                    }
+                } else if (currentRep === 'line') {
+                    if (currentColorScheme === 'plddt') {
+                        style.stick = { 
+                            colorfunc: plddtColor,
+                            radius: 0.05
+                        };
+                    } else {
+                        style.stick = { 
+                            colorscheme: colorschemeValue,
+                            radius: 0.05 //0.2
+                        };
+                    }
+                }
+                
+                // Apply the style based on representation (single chain)
+                // Apply only to protein atoms (not ligands or water) to avoid conflicts
+                if (currentRep === 'sphere') {
+                    // For sphere representation, apply to non-water, non-ligand atoms only
+                    viewer.setStyle({ not: { resn: 'HOH' }, not: { hetflag: true } }, style);
+                } else {
+                    // For other representations, apply to non-ligand atoms only
+                    viewer.setStyle({ not: { hetflag: true } }, style);
+                }
+                
+                updateRendering();
+                return;
+            }
+            
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    visibleChains.push(checkbox.value);
+                }
+            });
+            
+            // First, hide all atoms
+            viewer.setStyle({}, {});
+            
+            if (visibleChains.length > 0) {
+                // Show only selected chains
+                viewer.setStyle({ chain: visibleChains }, {});
+            }
+            
+            // Re-apply current representation and color scheme to visible chains
+            const currentRep = document.getElementById('representation').value;
+            const currentColorScheme = document.getElementById('colorScheme').value;
+            
+            if (visibleChains.length > 0) {
+                // Map color scheme names to 3Dmol.js values
+                let colorschemeValue;
+                switch(currentColorScheme) {
+                    case 'ss':
+                        colorschemeValue = 'ssPyMol';
+                        break;
+                    case 'element':
+                        colorschemeValue = 'element';
+                        break;
+                    case 'chain':
+                        colorschemeValue = 'chain';
+                        break;
+                    case 'plddt':
+                        colorschemeValue = 'plddt';
+                        break;
+                    default:
+                        colorschemeValue = 'ssPyMol';
+                }
+                
+                // Apply style only to visible chains
+                const style = {};
+                if (currentRep === 'cartoon') {
+                    if (currentColorScheme === 'plddt') {
+                        style.cartoon = { 
+                            colorfunc: plddtColor,
+                            arrows: true
+                        };
+                    } else {
+                        style.cartoon = { 
+                            colorscheme: colorschemeValue,
+                            arrows: true
+                        };
+                    }
+                } else if (currentRep === 'stick') {
+                    if (currentColorScheme === 'plddt') {
+                        style.stick = { 
+                            colorfunc: plddtColor,
+                            radius: 0.2
+                        };
+                    } else {
+                        style.stick = { 
+                            colorscheme: colorschemeValue,
+                            radius: 0.2
+                        };
+                    }
+                } else if (currentRep === 'sphere') {
+                    // For sphere representation, apply only to non-water atoms
+                    if (currentColorScheme === 'plddt') {
+                        style.sphere = { 
+                            colorfunc: plddtColor,
+                            scale: 1.0
+                        };
+                    } else {
+                        style.sphere = { 
+                            colorscheme: colorschemeValue,
+                            scale: 1.0
+                        };
+                    }
+                } else if (currentRep === 'line') {
+                    if (currentColorScheme === 'plddt') {
+                        style.stick = { 
+                            colorfunc: plddtColor,
+                            radius: 0.05
+                        };
+                    } else {
+                        style.stick = { 
+                            colorscheme: colorschemeValue,
+                            radius: 0.05
+                        };
+                    }
+                }
+                
+                // Apply style to visible chains, excluding water for sphere representation
+                if (currentRep === 'sphere') {
+                    viewer.setStyle({ chain: visibleChains, not: { resn: 'HOH' } }, style);
+                } else {
+                    viewer.setStyle({ chain: visibleChains }, style);
+                }
+            }
+            
+            // Re-apply ligand and water settings if they're enabled
+            const showLigands = document.getElementById('showLigands').checked;
+            const showWater = document.getElementById('showWater').checked;
+            
+            if (visibleChains.length > 0) {
+                if (showLigands) {
+                    // Filter ligands to only those from visible chains
+                    const visibleLigands = availableLigands.filter(ligand => {
+                        const ligandChain = ligand.split(':')[1];
+                        return visibleChains.includes(ligandChain);
+                    });
+                    
+                    // Display single-atom ligands as spheres with VDW radii
+                    const singleAtomLigands = visibleLigands.filter(ligand => {
+                        const ligandName = ligand.split(':')[0];
+                        return isSingleAtomLigand(ligandName);
+                    });
+                    
+                    // Display multi-atom ligands as sticks
+                    const multiAtomLigands = visibleLigands.filter(ligand => {
+                        const ligandName = ligand.split(':')[0];
+                        return !isSingleAtomLigand(ligandName);
+                    });
+                    
+                    // Apply sphere style to single-atom ligands
+                    singleAtomLigands.forEach(ligand => {
+                        const ligandName = ligand.split(':')[0];
+                        const ligandChain = ligand.split(':')[1];
+                        const vdwRadius = getVdwRadius(ligandName);
+                        const scale = vdwRadius * 0.3; // Single-atom ligands displayed at 0.3 of standard VDW radius for optimal visibility
+                        
+                        viewer.setStyle({ 
+                            hetflag: true, 
+                            resn: ligandName, 
+                            chain: ligandChain 
+                        }, { 
+                            sphere: { 
+                                colorscheme: 'element',
+                                scale: scale
+                            } 
+                        });
+                    });
+                    
+                    // Apply stick style to multi-atom ligands
+                    if (multiAtomLigands.length > 0) {
+                        const multiAtomResns = multiAtomLigands.map(ligand => ligand.split(':')[0]);
+                        viewer.setStyle({ 
+                            hetflag: true, 
+                            resn: multiAtomResns, 
+                            chain: visibleChains 
+                        }, { 
+                            stick: { 
+                                colorscheme: 'element' 
+                            } 
+                        });
+                    }
+                } else {
+                    // Hide ligands if not selected
+                    viewer.setStyle({ hetflag: true, not: { resn: 'HOH' }, chain: visibleChains }, {});
+                }
+                if (showWater) {
+                    viewer.setStyle({ resn: 'HOH', chain: visibleChains }, { 
+                        sphere: { 
+                            colorscheme: 'element',
+                            scale: 0.15
+                        } 
+                    });
+                } else {
+                    // Hide water if not selected
+                    viewer.setStyle({ resn: 'HOH', chain: visibleChains }, {});
+                }
+            }
+            
+            updateRendering();
+            
+            // Update chain indicator in Controls banner
+            updateChainIndicator();
+            
+            // Update ligand indicator to reflect chain visibility
+            updateLigandIndicator();
+            
+            // Update surface if it's enabled
+            const surfaceType = document.getElementById('surfaceType').value;
+            if (surfaceType !== 'none') {
+                toggleSurface();
+            }
+            
+            // Apply Center & Fit when chain selection changes
+            //setTimeout(() => {
+            //    centerAndFit();
+            //}, 100);
+        }
+        
+        // Fetch PDB structure information
+        async function fetchPdbInfo(pdbId) {
+            try {
+                const response = await fetch(`https://data.rcsb.org/rest/v1/core/entry/${pdbId.toUpperCase()}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const title = data.struct?.title || '';
+                    
+                    // Extract determination method and resolution
+                    let determinationMethod = '';
+                    let resolution = '';
+                    
+                    console.log('PDB API Response:', data);
+                    console.log('Full API response structure:', JSON.stringify(data, null, 2));
+                    
+                    if (data.exptl && data.exptl.length > 0) {
+                        const exptl = data.exptl[0];
+                        determinationMethod = exptl.method || '';
+                        console.log('Determination Method:', determinationMethod);
+                    }
+                    
+                    // Only extract resolution for methods that have it (X-ray crystallography, Cryo-EM)
+                    if (data.refine && data.refine.length > 0) {
+                        const refine = data.refine[0];
+                        console.log('Refine data:', refine);
+                        
+                        // Try multiple possible resolution field names
+                        if (refine.ls_d_res_high) {
+                            resolution = `${refine.ls_d_res_high} Å`;
+                            console.log('Resolution found (ls_d_res_high):', resolution);
+                        } else if (refine.ls_d_res_low) {
+                            resolution = `${refine.ls_d_res_low} Å`;
+                            console.log('Resolution found (ls_d_res_low):', resolution);
+                        } else if (refine.d_res_high) {
+                            resolution = `${refine.d_res_high} Å`;
+                            console.log('Resolution found (d_res_high):', resolution);
+                        } else if (refine.resolution) {
+                            resolution = `${refine.resolution} Å`;
+                            console.log('Resolution found (resolution):', resolution);
+      } else {
+                            console.log('No resolution field found in refine data');
+                            console.log('Available refine fields:', Object.keys(refine));
+                        }
+        } else {
+                        console.log('No refine data found');
+                    }
+                    
+                    // Also try to get resolution from other possible locations
+                    if (!resolution && data.refine && data.refine.length > 0) {
+                        const refine = data.refine[0];
+                        // Check for any field that might contain resolution
+                        for (const [key, value] of Object.entries(refine)) {
+                            if (key.toLowerCase().includes('res') && typeof value === 'number' && value > 0 && value < 10) {
+                                resolution = `${value} Å`;
+                                console.log(`Resolution found in field ${key}:`, resolution);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Try alternative API endpoints for resolution if not found in refine
+                    if (!resolution) {
+                        console.log('Trying alternative resolution sources...');
+                        
+                        // Check if there's resolution in other parts of the response
+                        if (data.struct && data.struct.resolution) {
+                            resolution = `${data.struct.resolution} Å`;
+                            console.log('Resolution found in struct:', resolution);
+                        }
+                        
+                        // Try to find resolution in any numeric field that looks like resolution
+                        if (!resolution) {
+                            console.log('Searching for resolution in all numeric fields...');
+                            const searchForResolution = (obj, path = '') => {
+                                for (const [key, value] of Object.entries(obj)) {
+                                    const currentPath = path ? `${path}.${key}` : key;
+                                    if (typeof value === 'number' && value > 0.5 && value < 50) {
+                                        // Check if field name suggests resolution
+                                        if (key.toLowerCase().includes('res') || 
+                                            key.toLowerCase().includes('resolution') ||
+                                            key.toLowerCase().includes('d_res') ||
+                                            key.toLowerCase().includes('ls_d_res')) {
+                                            resolution = `${value} Å`;
+                                            console.log(`Resolution found in field ${currentPath}:`, resolution);
+                                            return true;
+                                        }
+                                    } else if (typeof value === 'object' && value !== null) {
+                                        if (searchForResolution(value, currentPath)) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                                return false;
+                            };
+                            
+                            searchForResolution(data);
+                        }
+                        
+                        // For Cryo-EM structures, try additional field names
+                        if (!resolution && determinationMethod && (determinationMethod.toLowerCase().includes('cryo') || determinationMethod.toLowerCase().includes('electron'))) {
+                            console.log('Searching for Cryo-EM specific resolution fields...');
+                            // Try different possible Cryo-EM resolution field names
+                            if (data.refine && data.refine.length > 0) {
+                                const refine = data.refine[0];
+                                for (const [key, value] of Object.entries(refine)) {
+                                    if ((key.toLowerCase().includes('em') || key.toLowerCase().includes('cryo')) && 
+                                        key.toLowerCase().includes('res') && typeof value === 'number' && value > 0 && value < 50) {
+                                        resolution = `${value} Å`;
+                                        console.log(`Cryo-EM resolution found in field ${key}:`, resolution);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // For NMR structures, don't show resolution (they don't have it)
+                    // X-ray crystallography and Cryo-EM structures should show resolution
+                    if (determinationMethod && determinationMethod.toLowerCase().includes('nmr')) {
+                        resolution = ''; // Clear resolution for NMR structures
+                        console.log('NMR structure detected, clearing resolution');
+                    } else if (determinationMethod && (determinationMethod.toLowerCase().includes('cryo') || determinationMethod.toLowerCase().includes('electron'))) {
+                        console.log('Cryo-EM structure detected, resolution should be available:', resolution);
+                        console.log('Example Cryo-EM structures: 9MFE (3.22 Å), 6J6J, 6J6K, 6J6L');
+                    } else if (determinationMethod && determinationMethod.toLowerCase().includes('x-ray')) {
+                        console.log('X-ray structure detected, resolution should be available:', resolution);
+                        console.log('Example X-ray structures: 6XYZ (1.63 Å), 4DFR (1.70 Å), 1CRN');
+                    }
+                    
+                    // If still no resolution found, try alternative API endpoints
+                    if (!resolution && determinationMethod && (determinationMethod.toLowerCase().includes('cryo') || determinationMethod.toLowerCase().includes('electron'))) {
+                        console.log('Trying alternative API for Cryo-EM resolution...');
+                        try {
+                            // Try the summary API which might have resolution
+                            const summaryResponse = await fetch(`https://data.rcsb.org/rest/v1/core/entry/${pdbId.toUpperCase()}/summary`);
+                            if (summaryResponse.ok) {
+                                const summaryData = await summaryResponse.json();
+                                console.log('Summary API response:', summaryData);
+                                
+                                // Look for resolution in summary data
+                                if (summaryData.resolution) {
+                                    resolution = `${summaryData.resolution} Å`;
+                                    console.log('Resolution found in summary API:', resolution);
+                                }
+                            }
+                        } catch (error) {
+                            console.log('Summary API failed:', error);
+                        }
+                    }
+                    
+                    // Store globally for PNG export
+                    currentDeterminationMethod = determinationMethod;
+                    currentResolution = resolution;
+                    
+                    console.log('Final determination method:', currentDeterminationMethod);
+                    console.log('Final resolution:', currentResolution);
+                    
+                    return title;
+                }
+            } catch (error) {
+                console.log('Could not fetch PDB info:', error);
+            }
+            return '';
+        }
+        
+        // Fetch AlphaFold protein information
+        async function fetchAlphaFoldInfo(uniprotId) {
+            try {
+                const response = await fetch(`https://alphafold.ebi.ac.uk/api/prediction/${uniprotId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        const entry = data[0];
+                        
+                        // Try to get protein name from multiple sources
+                        let proteinName = '';
+                        
+                        // First try: proteinDescription from uniprotEntry
+                        if (entry.uniprotEntry?.proteinDescription) {
+                            proteinName = entry.uniprotEntry.proteinDescription;
+                        }
+                        
+                        // Second try: gene from uniprotEntry
+                        if (!proteinName && entry.uniprotEntry?.gene) {
+                            proteinName = entry.uniprotEntry.gene;
+                        }
+                        
+                        // Third try: organism from uniprotEntry
+                        if (!proteinName && entry.uniprotEntry?.organism) {
+                            proteinName = entry.uniprotEntry.organism;
+                        }
+                        
+                        // Fourth try: fallback to UniProt API
+                        if (!proteinName) {
+                            try {
+                                const uniprotResponse = await fetch(`https://rest.uniprot.org/uniprotkb/${uniprotId}.json`);
+                                if (uniprotResponse.ok) {
+                                    const uniprotData = await uniprotResponse.json();
+                                    
+                                    // Try protein name from UniProt
+                                    if (uniprotData.proteinDescription?.recommendedName?.fullName?.value) {
+                                        proteinName = uniprotData.proteinDescription.recommendedName.fullName.value;
+                                    } else if (uniprotData.proteinDescription?.alternativeNames?.[0]?.fullName?.value) {
+                                        proteinName = uniprotData.proteinDescription.alternativeNames[0].fullName.value;
+                                    } else if (uniprotData.gene?.[0]?.geneName?.value) {
+                                        proteinName = uniprotData.gene[0].geneName.value;
+                                    } else if (uniprotData.organism?.scientificName) {
+                                        proteinName = uniprotData.organism.scientificName;
+                                    }
+                                }
+                            } catch (uniprotError) {
+                                console.log('UniProt API fallback failed:', uniprotError);
+                            }
+                        }
+                        
+                        // Extract pLDDT confidence information
+                        let plddtConfidence = '';
+                        
+                        // Debug: log the entry structure to see what's available
+                        console.log('AlphaFold entry structure:', entry);
+                        
+                        // Try different possible confidence score fields
+                        let confidenceScore = null;
+                        if (entry.confidenceScore) {
+                            confidenceScore = entry.confidenceScore;
+                            console.log('Found confidenceScore:', confidenceScore);
+                        } else if (entry.confidence) {
+                            confidenceScore = entry.confidence;
+                            console.log('Found confidence:', confidenceScore);
+                        } else if (entry.plddtScore) {
+                            confidenceScore = entry.plddtScore;
+                            console.log('Found plddtScore:', confidenceScore);
+                        } else if (entry.plddt) {
+                            confidenceScore = entry.plddt;
+                            console.log('Found plddt:', confidenceScore);
+        } else {
+                            console.log('No confidence score found in AlphaFold entry');
+                        }
+                        
+                        if (confidenceScore !== null) {
+                            const score = parseFloat(confidenceScore);
+                            if (score >= 90) {
+                                plddtConfidence = 'Very High (90-100)';
+                            } else if (score >= 70) {
+                                plddtConfidence = 'Confident (70-90)';
+                            } else if (score >= 50) {
+                                plddtConfidence = 'Low (50-70)';
+                            } else {
+                                plddtConfidence = 'Very Low (0-50)';
+                            }
+                            plddtConfidence += ` (${score.toFixed(1)})`;
+                            console.log('pLDDT confidence set to:', plddtConfidence);
+                        } else {
+                            // Fallback: try to get average confidence from the structure
+                            plddtConfidence = 'pLDDT confidence scores available';
+                            console.log('Using fallback pLDDT confidence');
+                        }
+                        
+                        // Store globally for PNG export
+                        currentPlddtConfidence = plddtConfidence;
+                        
+                        return proteinName || '';
+                    }
+                }
+      } catch (error) {
+                console.log('Could not fetch AlphaFold info:', error);
+            }
+            return '';
+        }
+
+        // Load PDB structure
+        async function loadPdbStructure(pdbId) {
+            try {
+                currentStructureId = pdbId.toUpperCase();
+                isAlphaFoldModel = false;
+                
+                // Hide pLDDT key and option
+                document.getElementById('plddtKey').style.display = 'none';
+                document.getElementById('plddtOption').style.display = 'none';
+                
+                // Set default representation and color scheme for PDB
+                document.getElementById('representation').value = 'cartoon';
+                document.getElementById('colorScheme').value = 'chain';
+                
+                // Fetch PDB structure information
+                const moleculeName = await fetchPdbInfo(pdbId);
+                
+                // Update structure info with determination method and resolution
+                updateStructureInfo(currentStructureId, moleculeName, false);
+                
+                // Try PDB format first, then fallback to mmCIF format for large structures
+                let url = `https://files.rcsb.org/download/${pdbId}.pdb`;
+                console.log('Loading PDB structure:', url);
+                
+                let response = await fetch(url);
+                if (!response.ok) {
+                    console.log(`PDB format not available (${response.status}), trying mmCIF format...`);
+                    // Fallback to mmCIF format for large structures
+                    url = `https://files.rcsb.org/download/${pdbId}.cif`;
+                    console.log('Loading mmCIF structure:', url);
+                    response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`Structure not found in PDB database. Please check the PDB ID (${pdbId}) is correct.`);
+                    }
+                }
+                
+                const pdbData = await response.text();
+                console.log('PDB data length:', pdbData.length);
+                
+                // Store raw PDB data for ligand parsing
+                currentPdbData = pdbData;
+                
+                // Clear any existing models to prevent flickering
+                viewer.clear();
+                
+                // Hide canvas during loading to prevent flickering
+                const canvas = document.getElementById('viewer');
+                canvas.style.visibility = 'hidden';
+                
+                // Add model with appropriate format (PDB or mmCIF)
+                const format = url.endsWith('.cif') ? 'cif' : 'pdb';
+                viewer.addModel(pdbData, format);
+                console.log('Model added to viewer');
+                
+                // Detect if this is a multi-chain structure by checking for multiple chains
+                const chains = new Set();
+                const lines = pdbData.split('\n');
+                
+                if (format === 'cif') {
+                    // Handle mmCIF format - look for _atom_site.label_asym_id
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        if (line.startsWith('ATOM') || line.startsWith('HETATM')) {
+                            // Split by whitespace and get the chain ID (usually around index 18-19)
+                            const parts = line.trim().split(/\s+/);
+                            if (parts.length > 18) {
+                                const chain = parts[18];
+                                if (chain && chain !== '.') {
+                                    chains.add(chain);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Handle PDB format - look for chain ID at position 21
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        if (line.startsWith('ATOM') || line.startsWith('HETATM')) {
+                            const chain = line.substring(21, 22).trim();
+                            if (chain) {
+                                chains.add(chain);
+                            }
+                        }
+                    }
+                }
+                
+                const sortedChains = Array.from(chains).sort();
+                const isMultiChain = sortedChains.length > 1;
+                
+                // Apply default styling based on current settings
+                const currentRep = document.getElementById('representation').value;
+                const currentColorScheme = document.getElementById('colorScheme').value;
+                
+                // Map color scheme names to 3Dmol.js values
+                let colorschemeValue;
+                switch(currentColorScheme) {
+                    case 'ss':
+                        colorschemeValue = 'ssPyMol';
+                        break;
+                    case 'element':
+                        colorschemeValue = 'element';
+                        break;
+                    case 'chain':
+                        colorschemeValue = 'chain';
+                        break;
+                    case 'plddt':
+                        colorschemeValue = 'plddt';
+                        break;
+                    default:
+                        colorschemeValue = 'ssPyMol';
+                }
+                
+                // Apply style based on current representation
+                const style = {};
+                if (currentRep === 'cartoon') {
+                    style.cartoon = { 
+                        colorscheme: colorschemeValue,
+                        arrows: true
+                    };
+                } else if (currentRep === 'stick') {
+                    style.stick = { 
+                        colorscheme: colorschemeValue,
+                        radius: 0.2
+                    };
+                } else if (currentRep === 'sphere') {
+                    style.sphere = { 
+                        colorscheme: colorschemeValue,
+                        scale: 0.3
+                    };
+                } else if (currentRep === 'line') {
+                    style.stick = { 
+                        colorscheme: colorschemeValue,
+                        radius: 0.05 //1.3
+                    };
+                }
+                
+                viewer.setStyle({}, style);
+                console.log('Default styling applied:', currentRep, currentColorScheme);
+                
+                // For multi-chain structures, show all chains by default (no hiding)
+                if (isMultiChain) {
+                    console.log('Multi-chain detected, showing all chains by default');
+                    
+                    // Zoom to all chains
+                    viewer.zoomTo();
+                    console.log('Zoomed to all chains');
+                } else {
+                    // Single chain - zoom to all
+                    viewer.zoomTo();
+                    console.log('Single chain - zoomed to all');
+                }
+                
+                // Single render call
+                updateRendering();
+                console.log('Rendering updated');
+                
+                // Show canvas after rendering is complete
+                setTimeout(() => {
+                    canvas.style.visibility = 'visible';
+                }, 50);
+
+                // Structure information already updated after PDB info fetch
+                
+                // Setup chain controls (with shorter delay to improve performance)
+                setTimeout(() => {
+                    setupChainControls();
+                    // Apply chain filtering immediately after setup to prevent momentary display
+                    updateChainDisplay();
+                    
+                    // Apply Center & Fit after chain controls are set up
+                    setTimeout(() => {
+                        centerAndFit();
+                    }, 50);
+                }, 100);
+                
+                // Setup clickable functionality after structure is loaded
+                setupClickable();
+
+                console.log('PDB structure loaded successfully');
+                
+            } catch (error) {
+                console.error('Error loading PDB structure:', error);
+                throw error;
+            }
+        }
+        // Load AlphaFold structure
+        async function loadAlphaFoldStructure(afId) {
+            try {
+                currentStructureId = afId;
+                isAlphaFoldModel = true;
+                
+                // Show pLDDT key
+                document.getElementById('plddtKey').style.display = 'block';
+                
+                // Set default representation and color scheme for AlphaFold
+                document.getElementById('representation').value = 'cartoon';
+                document.getElementById('colorScheme').value = 'plddt';//'chain';
+                
+                // Show pLDDT option in color scheme dropdown
+                document.getElementById('plddtOption').style.display = 'block';
+                
+                const uniprotId = afId.replace('AF-', '').replace('-F1', '');
+                
+                // Fetch AlphaFold protein information
+                const proteinName = await fetchAlphaFoldInfo(uniprotId);
+                
+                // ROBUST ALPHAFOLD LOADING: Try multiple URL formats and versions
+                // This fallback system automatically handles AlphaFold database updates
+                // by testing different version numbers and URL formats until one works
+                const urlFormats = [
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v6.pdb`,  // Current v6 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model-v6.pdb`,  // Alternative v6 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v5.pdb`,  // Previous v5 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model-v5.pdb`,  // Alternative v5 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v4.pdb`,  // Previous v4 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model-v4.pdb`,  // Alternative v4 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v7.pdb`,  // Future v7 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model-v7.pdb`,  // Alternative v7 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v8.pdb`,  // Future v8 format
+                    `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model-v8.pdb`   // Alternative v8 format
+                ];
+                
+                let response = null;
+                let workingUrl = null;
+                
+                // Try each URL format until one works
+                for (let i = 0; i < urlFormats.length; i++) {
+                    const url = urlFormats[i];
+                    console.log(`Trying AlphaFold URL ${i + 1}/${urlFormats.length}:`, url);
+                    
+                    try {
+                        response = await fetch(url);
+                        if (response.ok) {
+                            workingUrl = url;
+                            console.log(`✅ AlphaFold structure found at:`, url);
+                            break;
+                        } else {
+                            console.log(`❌ Failed (${response.status}):`, url);
+                        }
+                    } catch (error) {
+                        console.log(`❌ Network error:`, url, error.message);
+                    }
+                }
+                
+                if (!response || !response.ok) {
+                    throw new Error(`Failed to fetch AlphaFold structure: All ${urlFormats.length} URL formats failed. Last error: ${response ? response.status : 'Network error'}`);
+                }
+                
+                const pdbData = await response.text();
+                console.log(`AlphaFold data loaded successfully from: ${workingUrl}`);
+                console.log('AlphaFold data length:', pdbData.length);
+                
+                // Store raw PDB data for ligand parsing
+                currentPdbData = pdbData;
+                
+                // Clear any existing models to prevent flickering
+                viewer.clear();
+                
+                // Hide canvas during loading to prevent flickering
+                const canvas = document.getElementById('viewer');
+                canvas.style.visibility = 'hidden';
+                
+                // Add model without any chain filtering initially
+                viewer.addModel(pdbData, 'pdb');
+                console.log('AlphaFold model added to viewer');
+                
+                // Detect if this is a multi-chain structure by checking for multiple chains
+                const chains = new Set();
+                const lines = pdbData.split('\n');
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (line.startsWith('ATOM') || line.startsWith('HETATM')) {
+                        const chain = line.substring(21, 22).trim();
+                        if (chain) {
+                            chains.add(chain);
+                        }
+                    }
+                }
+                
+                const sortedChains = Array.from(chains).sort();
+                const isMultiChain = sortedChains.length > 1;
+                
+                // Apply default styling based on current settings
+                const currentRep = document.getElementById('representation').value;
+                const currentColorScheme = document.getElementById('colorScheme').value;
+                
+                // Map color scheme names to 3Dmol.js values
+                let colorschemeValue;
+                switch(currentColorScheme) {
+                    case 'ss':
+                        colorschemeValue = 'ssPyMol';
+                        break;
+                    case 'element':
+                        colorschemeValue = 'element';
+                        break;
+                    case 'chain':
+                        colorschemeValue = 'chain';
+                        break;
+                    case 'plddt':
+                        colorschemeValue = 'plddt';
+                        break;
+                    default:
+                        colorschemeValue = 'ssPyMol';
+                }
+                
+                // Apply style based on current representation
+                const style = {};
+                if (currentRep === 'cartoon') {
+                    if (currentColorScheme === 'plddt') {
+                        style.cartoon = { 
+                            colorfunc: plddtColor,
+                            arrows: true
+                        };
+                    } else {
+                        style.cartoon = { 
+                            colorscheme: colorschemeValue,
+                            arrows: true
+                        };
+                    }
+                } else if (currentRep === 'stick') {
+                    if (currentColorScheme === 'plddt') {
+                        style.stick = { 
+                            colorfunc: plddtColor,
+                            radius: 0.2
+                        };
+                    } else {
+                        style.stick = { 
+                            colorscheme: colorschemeValue,
+                            radius: 0.2
+                        };
+                    }
+                } else if (currentRep === 'sphere') {
+                    if (currentColorScheme === 'plddt') {
+                        style.sphere = { 
+                            colorfunc: plddtColor,
+                            scale: 0.3
+                        };
+                    } else {
+                        style.sphere = { 
+                            colorscheme: colorschemeValue,
+                            scale: 0.3
+                        };
+                    }
+                } else if (currentRep === 'line') {
+                    if (currentColorScheme === 'plddt') {
+                        style.stick = { 
+                            colorfunc: plddtColor,
+                            radius: 0.05 //1.3
+                        };
+                    } else {
+                        style.stick = { 
+                            colorscheme: colorschemeValue,
+                            radius: 0.05 //1.3
+                        };
+                    }
+                }
+                
+                viewer.setStyle({}, style);
+                console.log('AlphaFold default styling applied:', currentRep, currentColorScheme);
+                
+                // For multi-chain structures, show all chains by default (no hiding)
+                if (isMultiChain) {
+                    console.log('AlphaFold multi-chain detected, showing all chains by default');
+                    
+                    // Zoom to all chains
+                    viewer.zoomTo();
+                    console.log('AlphaFold zoomed to all chains');
+                } else {
+                    // Single chain - zoom to all
+                    viewer.zoomTo();
+                    console.log('AlphaFold single chain - zoomed to all');
+                }
+                
+                // Single render call
+                updateRendering();
+                console.log('AlphaFold rendering updated');
+                
+                // Show canvas after rendering is complete
+                setTimeout(() => {
+                    canvas.style.visibility = 'visible';
+                }, 50);
+                
+                // Update structure information display
+                updateStructureInfo(currentStructureId, proteinName, true);
+                
+                // Setup chain controls (with shorter delay to improve performance)
+                setTimeout(() => {
+                    setupChainControls();
+                    // Apply chain filtering immediately after setup to prevent momentary display
+                    updateChainDisplay();
+                    
+                    // Apply Center & Fit after chain controls are set up
+                    setTimeout(() => {
+                        centerAndFit();
+                    }, 50);
+                }, 100);
+                
+                // Setup clickable functionality after structure is loaded
+                setupClickable();
+                
+                console.log('AlphaFold structure loaded successfully');
+                
+            } catch (error) {
+                console.error('Error loading AlphaFold structure:', error);
+                throw error;
+            }
+        }
+
+        // Parse URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            initViewer();
+            
+            // Initialize control visibility (hide both initially)
+            updateLigandsControlVisibility();
+            updateWaterControlVisibility();
+            
+            // Get structure ID from URL parameters
+            const entId = getUrlParameter('entId') || getUrlParameter('pdbId') || getUrlParameter('pdbid') || getUrlParameter('id');
+            
+            if (entId) {
+                try {
+                    if (entId.startsWith('AF-') && entId.endsWith('-F1')) {
+                        // AlphaFold structure
+                        await loadAlphaFoldStructure(entId);
+                    } else {
+                        // PDB structure
+                        await loadPdbStructure(entId);
+                    }
+                } catch (error) {
+                    console.error('Failed to load structure:', error);
+                    document.getElementById('viewer').innerHTML = `
+                        <div style="color: red; padding: 20px; text-align: center;">
+                            Failed to load structure: ${error.message}
+  </div>
+                    `;
+                }
+            }
+        });
+
+        // pLDDT color function
+        function plddtColor(s) {
+            const score = s.b;
+            if (score >= 90) return '0x4343e7'; // Blueish - Very high confidence
+            if (score >= 70) return '0x56acf8'; // Light Blueish - Very confident
+            if (score >= 50) return '0xffff00'; // Yellow - Confident
+            if (score >= 40) return '0xff8800'; // Orange - Low confidence
+            return '0xff0000'; // Red - Very low confidence
+        }
+
+        // Apply color scheme function
+        function applyColorScheme(colorScheme, rep) {
+            let style = {};
+            let colorschemeValue;
+            
+            // Map color scheme names to 3Dmol.js values
+            switch(colorScheme) {
+                case 'ss':
+                    colorschemeValue = 'ssPyMol';
+                    break;
+                case 'element':
+                    colorschemeValue = 'element';
+                    break;
+                case 'chain':
+                    colorschemeValue = 'chain';
+                    break;
+                case 'plddt':
+                    colorschemeValue = 'plddt';
+                    break;
+                default:
+                    colorschemeValue = 'ssPyMol';
+            }
+            
+            if (rep === 'cartoon') {
+                if (colorScheme === 'plddt') {
+                    style.cartoon = { 
+                        colorfunc: plddtColor,
+                        arrows: true
+                    };
+                } else {
+                    style.cartoon = { 
+                        colorscheme: colorschemeValue,
+                        arrows: true
+                    };
+                }
+            } else if (rep === 'stick') {
+                if (colorScheme === 'plddt') {
+                    style.stick = { 
+                        colorfunc: plddtColor
+                    };
+                } else {
+                    style.stick = { 
+                        colorscheme: colorschemeValue
+                    };
+                }
+            } else if (rep === 'sphere') {
+                // For sphere representation, exclude water molecules by default
+                if (colorScheme === 'plddt') {
+                    style.sphere = { 
+                        colorfunc: plddtColor,
+                        scale: 1.0
+                    };
+                } else {
+                    style.sphere = { 
+                        colorscheme: colorschemeValue,
+                        scale: 1.0
+                    };
+                }
+            } else if (rep === 'line') {
+                if (colorScheme === 'plddt') {
+                    style.stick = { 
+                        colorfunc: plddtColor,
+                        radius: 0.05
+                    };
+                } else {
+                    style.stick = { 
+                        colorscheme: colorschemeValue,
+                        radius: 0.05 //0.2
+                    };
+                }
+            }
+            
+            // Apply styling based on representation
+            if (rep === 'sphere') {
+                // For sphere representation, apply to non-water atoms only
+                viewer.setStyle({ not: { resn: 'HOH' } }, style);
+            } else {
+                // For other representations, apply to all atoms
+                viewer.setStyle({}, style);
+            }
+            updateRendering();
+        }
+
+        // Event listeners for controls
+        document.getElementById('representation').addEventListener('change', function() {
+            const rep = this.value;
+            const colorScheme = document.getElementById('colorScheme').value;
+            
+            // Check if this is a single chain structure
+            const checkboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]:not(#chain-all)');
+            const isSingleChain = checkboxes.length === 0;
+            
+            if (isSingleChain) {
+                // For single chain, just update the display (which handles styling)
+                updateChainDisplay();
+            } else {
+                // For multi-chain, apply chain filtering immediately to prevent momentary display of all chains
+                updateChainDisplay();
+                
+                // Apply the new representation and color scheme
+                applyColorScheme(colorScheme, rep);
+                
+                // Re-apply chain filtering after representation change
+                updateChainDisplay();
+            }
+        });
+
+        document.getElementById('colorScheme').addEventListener('change', function() {
+            const colorScheme = this.value;
+            const rep = document.getElementById('representation').value;
+            
+            // Check if this is a single chain structure
+            const checkboxes = document.querySelectorAll('#chainsContainer input[type="checkbox"]:not(#chain-all)');
+            const isSingleChain = checkboxes.length === 0;
+            
+            if (isSingleChain) {
+                // For single chain, just update the display (which handles styling)
+                updateChainDisplay();
+            } else {
+                // Apply chain filtering immediately to prevent momentary display of all chains
+                updateChainDisplay();
+                
+                // Apply color scheme directly
+                applyColorScheme(colorScheme, rep);
+                
+                // Re-apply chain filtering after color scheme change
+                updateChainDisplay();
+            }
+            
+            // Update surface if it's enabled
+            const surfaceType = document.getElementById('surfaceType').value;
+            if (surfaceType !== 'none') {
+                toggleSurface();
+            }
+        });
+
+        document.getElementById('showLigands').addEventListener('change', function() {
+            // Apply chain filtering immediately to prevent momentary display of all chains
+            updateChainDisplay();
+            
+            // Update ligand indicator
+            updateLigandIndicator();
+        });
+
+        document.getElementById('showWater').addEventListener('change', function() {
+            // Apply chain filtering immediately to prevent momentary display of all chains
+            updateChainDisplay();
+        });
+
+        document.getElementById('surfaceType').addEventListener('change', function() {
+            toggleSurface();
+        });
+
+        document.getElementById('surfaceOpacity').addEventListener('input', function() {
+            // Update the displayed value
+            document.getElementById('opacityValue').textContent = this.value;
+            
+            // Update surface if it's currently enabled
+            const surfaceType = document.getElementById('surfaceType').value;
+            if (surfaceType !== 'none') {
+                toggleSurface();
+            }
+        });
+    </script>
+</body>
+</html>

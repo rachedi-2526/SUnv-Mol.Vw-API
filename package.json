@@ -1,0 +1,51 @@
+{
+  "name": "sunv-mol-vw-api",
+  "version": "1.0.0",
+  "description": "Advanced Molecular Visualization API for PDB and AlphaFold structures",
+  "main": "SUnv-Mol_Vw_api.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "npx serve .",
+    "dev": "npx live-server --port=8000"
+  },
+  "keywords": [
+    "molecular-visualization",
+    "3d",
+    "protein",
+    "nucleic-acid",
+    "pdb",
+    "alphafold",
+    "bioinformatics",
+    "webgl",
+    "3dmol.js",
+    "research",
+    "education"
+  ],
+  "author": {
+    "name": "Dr. Abdelkrim RACHEDI",
+    "email": "bioinformatics@univ-saida.dz",
+    "url": "https://bioinformatics.univ-saida.dz"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/SUnv-Mol.Vw-API.git"
+  },
+  "homepage": "https://yourusername.github.io/SUnv-Mol.Vw-API/",
+  "bugs": {
+    "url": "https://github.com/yourusername/SUnv-Mol.Vw-API/issues"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "devDependencies": {
+    "serve": "^14.0.0",
+    "live-server": "^1.2.2"
+  },
+  "files": [
+    "SUnv-Mol_Vw_api.html",
+    "demo.html",
+    "README.md",
+    "LICENSE"
+  ]
+}

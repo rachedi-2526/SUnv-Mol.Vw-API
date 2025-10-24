@@ -1,6 +1,10 @@
 MIT License
 
+<<<<<<< HEAD
 Copyright (c) 2025 rachedi-2526
+=======
+Copyright (c) 2025 University of Saida - Dr. Moulay Tahar, Saida, Algeria
+>>>>>>> ae45a21 (Initial commit: SUnv-Mol.Vw API v1.0)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +23,17 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+<<<<<<< HEAD
+=======
+
+---
+
+SUnv-Mol.Vw API - Advanced Molecular Visualization for Research and Education
+
+Author: Dr. Abdelkrim RACHEDI
+Institution: University of Saida - Dr. Moulay Tahar, Saida, Algeria
+Year: 2025
+
+This software is developed for academic and research purposes to provide
+advanced molecular visualization capabilities for the scientific community.
+>>>>>>> ae45a21 (Initial commit: SUnv-Mol.Vw API v1.0)

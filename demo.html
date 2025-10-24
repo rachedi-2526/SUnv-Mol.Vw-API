@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUnv-Mol.Vw API - Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+        }
+        
+        .demo-section h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .example-card {
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .example-card:hover {
+            border-color: #3498db;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.2);
+        }
+        
+        .example-card h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .example-card p {
+            margin: 0 0 15px 0;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        .example-card .structure-id {
+            font-family: 'Courier New', monospace;
+            background: #ecf0f1;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .viewer-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .viewer-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .input-group button {
+            padding: 12px 25px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        
+        .input-group button:hover {
+            background: #2980b9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .feature h3 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+        
+        .feature p {
+            color: #7f8c8d;
+            margin: 0;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 SUnv-Mol.Vw API</h1>
+            <p>Advanced Molecular Visualization for Research and Education</p>
+        </div>
+        
+        <div class="content">
+            <div class="demo-section">
+                <h2>🚀 Quick Start</h2>
+                <p>Enter a structure ID below to visualize it instantly:</p>
+                
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="text" id="structureInput" placeholder="Enter PDB ID (e.g., 1CRN) or AlphaFold ID (e.g., AF-Q9I4X8-F1)" value="1CRN">
+                        <button onclick="loadStructure()">Load Structure</button>
+                    </div>
+                </div>
+                
+                <div class="viewer-container">
+                    <iframe id="viewerFrame" class="viewer-frame" src="SUnv-Mol_Vw_api.html?entId=1CRN"></iframe>
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <h2>📚 Example Structures</h2>
+                <p>Click on any structure below to load it in the viewer:</p>
+                
+                <div class="example-grid">
+                    <div class="example-card" onclick="loadExample('1CRN')">
+                        <h3>🧬 Crambin</h3>
+                        <p>A small plant protein (46 residues) - perfect for testing</p>
+                        <div class="structure-id">1CRN</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="loadExample('4DFR')">
+                        <h3>🔬 Dihydrofolate Reductase</h3>
+                        <p>Multi-chain complex with ligands - demonstrates chain management</p>
+                        <div class="structure-id">4DFR</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="loadExample('1ATJ')">
+                        <h3>🩸 Antithrombin</h3>
+                        <p>Large protein with multiple chains - shows advanced features</p>
+                        <div class="structure-id">1ATJ</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="loadExample('AF-Q9I4X8-F1')">
+                        <h3>🤖 AlphaFold Prediction</h3>
+                        <p>AI-predicted protein structure with confidence scores</p>
+                        <div class="structure-id">AF-Q9I4X8-F1</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="loadExample('2POR')">
+                        <h3>🔌 Porin</h3>
+                        <p>Membrane protein - demonstrates surface rendering</p>
+                        <div class="structure-id">2POR</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="loadExample('1HTM')">
+                        <h3>🩸 Hemoglobin</h3>
+                        <p>Classic protein structure - multiple chains and heme groups</p>
+                        <div class="structure-id">1HTM</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="loadExample('4V6X')">
+                        <h3>🌱 Photosystem II</h3>
+                        <p>Large macromolecular complex - demonstrates mmCIF support</p>
+                        <div class="structure-id">4V6X</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <h2>✨ Key Features</h2>
+                
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Multiple Representations</h3>
+                        <p>Cartoon, Stick, Line, Sphere, and Surface rendering options</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon">🌈</div>
+                        <h3>Dynamic Color Schemes</h3>
+                        <p>Secondary Structure, Element, Chain, and pLDDT coloring</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon">🔗</div>
+                        <h3>Chain Management</h3>
+                        <p>Multi-chain support with individual chain toggling</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Atom Picking</h3>
+                        <p>Click on atoms to display residue information</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon">📊</div>
+                        <h3>Confidence Visualization</h3>
+                        <p>pLDDT confidence scores for AlphaFold structures</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon">📱</div>
+                        <h3>Responsive Design</h3>
+                        <p>Optimized for desktop and mobile devices</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon">🏗️</div>
+                        <h3>Large Structure Support</h3>
+                        <p>Automatic mmCIF fallback for macromolecular complexes</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <h2>🔧 Integration Examples</h2>
+                
+                <h3>Direct URL Usage</h3>
+                <p>Use the API directly with URL parameters:</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0;">
+                    SUnv-Mol_Vw_api.html?entId=1CRN<br>
+                    SUnv-Mol_Vw_api.html?entId=AF-Q9I4X8-F1
+                </div>
+                
+                <h3>Embed in Web Page</h3>
+                <p>Embed the viewer in your website:</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0;">
+                    &lt;iframe src="SUnv-Mol_Vw_api.html?entId=1CRN" width="800" height="600"&gt;&lt;/iframe&gt;
+                </div>
+                
+                <h3>JavaScript Integration</h3>
+                <p>Load structures programmatically:</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0;">
+                    function loadStructure(id) {<br>
+                    &nbsp;&nbsp;window.open('SUnv-Mol_Vw_api.html?entId=' + id, '_blank');<br>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>SUnv-Mol.Vw API</strong> - Advanced Molecular Visualization</p>
+            <p>© 2025 University of Saida - Dr. Moulay Tahar, Saida, Algeria</p>
+            <p>Author: <strong>Dr. Abdelkrim RACHEDI</strong></p>
+            <p>
+                <a href="https://github.com/rachedi-2526/SUnv-Mol.Vw-API">GitHub Repository</a> | 
+                <a href="README.md">Documentation</a> | 
+                <a href="mailto:bioinformatics@univ-saida.dz">Contact</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function loadStructure() {
+            const input = document.getElementById('structureInput');
+            const structureId = input.value.trim();
+            
+            if (structureId) {
+                const viewerFrame = document.getElementById('viewerFrame');
+                viewerFrame.src = `SUnv-Mol_Vw_api.html?entId=${structureId}`;
+            }
+        }
+        
+        function loadExample(structureId) {
+            const input = document.getElementById('structureInput');
+            input.value = structureId;
+            loadStructure();
+        }
+        
+        // Allow Enter key to load structure
+        document.getElementById('structureInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadStructure();
+            }
+        });
+        
+        // Add some interactive effects
+        document.querySelectorAll('.example-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

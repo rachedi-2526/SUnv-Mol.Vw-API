@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 # SUnv-Mol.Vw-API
 Advanced Molecular Visualization API for PDB and AlphaFold Structures. It is primarily meant for educational purposes.
 [README.md](https://github.com/user-attachments/files/23130974/README.md)
+=======
+# SUnv-Mol.Vw API
+>>>>>>> ae45a21 (Initial commit: SUnv-Mol.Vw API v1.0)
 
 A powerful, web-based molecular visualization API that provides interactive 3D visualization of protein structures from PDB and AlphaFold databases. Built with 3Dmol.js, this tool offers seamless integration into web applications and research workflows.
 
@@ -186,7 +190,7 @@ The API automatically handles large macromolecular complexes:
 
 1. **Clone Repository**:
    ```bash
-   git clone https://github.com/yourusername/SUnv-Mol.Vw-API.git
+   git clone https://github.com/rachedi-2526/SUnv-Mol.Vw-API.git
    cd SUnv-Mol.Vw-API
    ```
 
@@ -212,7 +216,7 @@ The API automatically handles large macromolecular complexes:
 #### **GitHub Pages**
 1. Upload files to GitHub repository
 2. Enable GitHub Pages in repository settings
-3. Access via: `https://yourusername.github.io/repository-name/`
+3. Access via: `https://rachedi-2526.github.io/repository-name/`
 
 #### **Netlify**
 1. Connect GitHub repository to Netlify
@@ -328,7 +332,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 5. Submit a pull request
 
 ### **Bug Reports**
-Please report bugs via [GitHub Issues](https://github.com/yourusername/SUnv-Mol.Vw-API/issues).
+Please report bugs via [GitHub Issues](https://github.com/rachedi-2526/SUnv-Mol.Vw-API/issues).
 
 ## 📄 License
 
@@ -347,18 +351,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Documentation**: [Wiki](https://github.com/yourusername/SUnv-Mol.Vw-API/wiki)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/SUnv-Mol.Vw-API/issues)
+- **Documentation**: [Wiki](https://github.com/rachedi-2526/SUnv-Mol.Vw-API/wiki)
+- **Issues**: [GitHub Issues](https://github.com/rachedi-2526/SUnv-Mol.Vw-API/issues)
 - **Email**: [bioinformatics@univ-saida.dz](mailto:bioinformatics@univ-saida.dz)
 
 ## 🔗 Links
 
-- **Live Demo**: [https://yourusername.github.io/SUnv-Mol.Vw-API/](https://yourusername.github.io/SUnv-Mol.Vw-API/)
-- **GitHub Repository**: [https://github.com/yourusername/SUnv-Mol.Vw-API](https://github.com/yourusername/SUnv-Mol.Vw-API)
-- **Documentation**: [https://github.com/yourusername/SUnv-Mol.Vw-API/wiki](https://github.com/yourusername/SUnv-Mol.Vw-API/wiki)
+- **Live Demo**: [https://rachedi-2526.github.io/SUnv-Mol.Vw-API/](https://rachedi-2526.github.io/SUnv-Mol.Vw-API/)
+- **GitHub Repository**: [https://github.com/rachedi-2526/SUnv-Mol.Vw-API](https://github.com/rachedi-2526/SUnv-Mol.Vw-API)
+- **Documentation**: [https://github.com/rachedi-2526/SUnv-Mol.Vw-API/wiki](https://github.com/rachedi-2526/SUnv-Mol.Vw-API/wiki)
 
 ---
 
 **© 2025 University of Saida - Dr. Moulay Tahar, Saida, Algeria**
 
+<<<<<<< HEAD
 *SUnv-Mol.Vw API - Advanced Molecular Visualization for Research and Education*
+=======
+*SUnv-Mol.Vw API - Advanced Molecular Visualization for Research and Education*
+>>>>>>> ae45a21 (Initial commit: SUnv-Mol.Vw API v1.0)

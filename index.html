@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUnv-Mol.Vw API - Molecular Visualization</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .content {
+            padding: 40px;
+        }
+        .button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background 0.3s ease;
+        }
+        .button:hover {
+            background: #2980b9;
+        }
+        .feature {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 SUnv-Mol.Vw API</h1>
+            <p>Advanced Molecular Visualization for Research and Education</p>
+        </div>
+        
+        <div class="content">
+            <h2>Welcome to SUnv-Mol.Vw API</h2>
+            <p>A powerful, web-based molecular visualization API that provides interactive 3D visualization of protein structures from PDB and AlphaFold databases.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="demo.html" class="button">🎮 Try Demo</a>
+                <a href="SUnv-Mol_Vw_api.html?entId=1CRN" class="button">🔬 View API</a>
+            </div>
+            
+            <div class="feature">
+                <h3>🚀 Quick Start</h3>
+                <p>Load any PDB or AlphaFold structure instantly:</p>
+                <ul>
+                    <li><strong>PDB Structures:</strong> <code>SUnv-Mol_Vw_api.html?entId=1CRN</code></li>
+                    <li><strong>AlphaFold:</strong> <code>SUnv-Mol_Vw_api.html?entId=AF-Q9I4X8-F1</code></li>
+                    <li><strong>Large Complexes:</strong> <code>SUnv-Mol_Vw_api.html?entId=4V6X</code></li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h3>✨ Key Features</h3>
+                <ul>
+                    <li>3D molecular visualization with WebGL</li>
+                    <li>Multiple representations (Cartoon, Stick, Line, Sphere, Surface)</li>
+                    <li>Dynamic color schemes (Secondary Structure, Element, Chain, pLDDT)</li>
+                    <li>Multi-chain structure support</li>
+                    <li>Large macromolecular complex support (mmCIF format)</li>
+                    <li>Responsive design for all devices</li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h3>📚 Documentation</h3>
+                <p>Complete documentation and deployment guides:</p>
+                <ul>
+                    <li><a href="README.md">📖 README.md</a> - Complete documentation</li>
+                    <li><a href="DEPLOYMENT.md">🏛️ DEPLOYMENT.md</a> - Academic server setup</li>
+                    <li><a href="CONTRIBUTING.md">🤝 CONTRIBUTING.md</a> - How to contribute</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0; padding: 20px; background: #ecf0f1; border-radius: 10px;">
+                <h3>🏛️ Academic Research Tool</h3>
+                <p><strong>Author:</strong> Dr. Abdelkrim RACHEDI</p>
+                <p><strong>Institution:</strong> University of Saida - Dr. Moulay Tahar, Saida, Algeria</p>
+                <p><strong>Contact:</strong> <a href="mailto:bioinformatics@univ-saida.dz">bioinformatics@univ-saida.dz</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
